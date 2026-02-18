@@ -4,6 +4,7 @@ Welcome to the TrakIt app! This guide explains how to set up and run the project
 
 ## Tech Stack
 
+- Next.js (React framework)
 - React (frontend UI library)
 - Backend: TBD
 

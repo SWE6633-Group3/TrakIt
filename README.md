@@ -56,6 +56,18 @@ To streamline collaboration and project management, we use Atlassian tools for d
 - **Meeting Schedule:** [Stand-ups, planning, retrospectives]
 - **geekbot:** Sends daily standup reminders and tracks responses from all team members.
 
+## Branch Strategy
+
+- `main`: stable, reviewed code only.
+- `dev`: optional integration branch for merged work in progress.
+- `feature/<short-name>`: new features (one feature per branch).
+- `bugfix/<short-name>`: non-urgent fixes.
+- `hotfix/<short-name>`: urgent fixes targeting `main`.
+- PRs required for merging into `main` (and `dev` if used).
+- At least one PR review approval is required before merge.
+- Lint must pass before merge (GitHub Action: `Lint`).
+- Delete branches after merge to keep the repo clean.
+
 ## Contributors
 
 - Aaliyah McElrath
