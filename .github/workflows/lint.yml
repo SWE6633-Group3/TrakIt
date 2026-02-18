@@ -20,14 +20,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for package.json
+        id: package_json
+        run: |
+          if [ -f package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
+        if: steps.package_json.outputs.exists == 'true'
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
+        if: steps.package_json.outputs.exists == 'true'
         run: npm install
 
       - name: Run lint
+        if: steps.package_json.outputs.exists == 'true'
         run: npm run lint
