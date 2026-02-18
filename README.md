@@ -59,7 +59,7 @@ To streamline collaboration and project management, we use Atlassian tools for d
 ## Branch Strategy
 
 - `main`: stable, reviewed code only.
-- `dev`: optional integration branch for merged work in progress.
+- `dev`: optional integration branch (only used if the team explicitly decides to adopt it).
 - `feature/<short-name>`: new features (one feature per branch).
 - `bugfix/<short-name>`: non-urgent fixes.
 - `hotfix/<short-name>`: urgent fixes targeting `main`.

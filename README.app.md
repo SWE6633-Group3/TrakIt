@@ -6,7 +6,7 @@ Welcome to the TrakIt app! This guide explains how to set up and run the project
 
 - Next.js (React framework)
 - React (frontend UI library)
-- Backend: TBD
+- Backend: MongoDB (data store; server framework TBD)
 
 ## Getting Started
 
