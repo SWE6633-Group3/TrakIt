@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectToDatabase, getDb } from './mongodbConnector.js';
+import projectRoutes from './routes/index.js';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const MONGO_DB = process.env.MONGO_DB ?? 'trackit';
 
 app.use(cors());
 app.use(express.json());
+app.use('/api', projectRoutes);
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.originalUrl} from ${req.ip}`);
