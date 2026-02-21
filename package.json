@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "server": "nodemon --watch server --exec \"node --loader ts-node/esm server/server.ts\"",
-    "start-dev": "concurrently \"npm run server\" \"npm run dev\""
+    "start-dev": "concurrently \"npm run server APP_ENV=development\" \"npm run dev\" "
   },
   "dependencies": {
     "antd": "^6.3.0",
@@ -33,8 +33,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "concurrently": "^9.2.1",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint": "^10.0.1",
+    "eslint-config-next": "^0.2.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

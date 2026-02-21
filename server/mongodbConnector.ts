@@ -8,6 +8,17 @@ export async function connectToDatabase(uri: string, dbName: string) {
   await client.connect();
   db = client.db(dbName);
   console.log('Connected to MongoDB:', dbName);
+  
+  process.on('exit', async () => {
+    await closeDatabase();
+    console.log('MongoDB connection closed due to process exit');
+  });
+  process.on('SIGINT', async () => {
+    await closeDatabase();
+    console.log('MongoDB connection closed due to app termination');
+    process.exit(0);
+  });
+
   return db;
 }
 
