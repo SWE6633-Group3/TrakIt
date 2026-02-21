@@ -1,20 +1,22 @@
-const Project = require('../models/Project');
+import { Request, Response } from 'express';
+import { getDb } from '../mongodbConnector.js'; 
 
-exports.getProjects = async (req, res) => {
+export const getProjects = async (req: Request, res: Response) => {
     try {
-        const projects = await Project.find();
+        const db = getDb();
+        const projects = await db.collection('projects').find({}).toArray();
         res.status(200).json(projects);
-    } catch (err) {
+    } catch (err: any) {
         res.status(500).json({ message: err.message });
     }
 };
 
-exports.createProject = async (req, res) => {
+export const createProject = async (req: Request, res: Response) => {
     try {
-        const newProject = new Project(req.body);
-        const savedProject = await newProject.save();
-        res.status(201).json(savedProject);
-    } catch (err) {
-        res.status(400).json({ message: "Validation Error", error: err.message });
+        const db = getDb();
+        const result = await db.collection('projects').insertOne(req.body);
+        res.status(201).json({ _id: result.insertedId, ...req.body });
+    } catch (err: any) {
+        res.status(400).json({ message: "Database Error", error: err.message });
     }
 };
