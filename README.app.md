@@ -11,6 +11,9 @@ npm -v
 ```
 
 ## Install
+- Next.js (React framework)
+- React (frontend UI library)
+- Backend: MongoDB (data store; server framework TBD)
 
 1. Open a terminal and change into the project folder:
 
