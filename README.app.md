@@ -82,6 +82,31 @@ NEXT_PUBLIC_API_URL=https://api.example.com
 
 Next.js automatically loads `.env.local` during development.
 
+## Backend Setup & testing
+
+The backend runs as a spearate Express server on port 3001.
+
+1. **Environment Setup**: Create a `.env` file in the root (separate from `.env.local`) with the following:
+   ```env
+   PORT=3001
+   MONGO_URI=mongodb://localhost:27017
+   MONGO_DB=trackit
+   ```
+   
+2. **Run Backend Individually**: If you only want to test the server without the frontend:
+   ```bash
+   npx tsx server/server.ts
+   ```
+   
+3. **Verify Health**: Once the server is running, visit `http://localhost:3001/api/health` in your browser. You should receive a JSON response:
+   ```json
+   {
+     "status": "success",
+     "message": "Backend server is running",
+     "port": 3001
+   }
+   ```
+   
 ## Troubleshooting
 
 If you run into problems:
