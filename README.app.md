@@ -1,60 +1,111 @@
-# TrakIt App
+## Prerequisites
 
-Welcome to the TrakIt app! This guide explains how to set up and run the project once development begins.
+- Node.js 18 or later (LTS recommended)
+- npm (bundled with Node.js). You can also use yarn or pnpm if you prefer.
 
-## Tech Stack
+Verify installation:
 
+```bash
+node -v
+npm -v
+```
+
+## Install
 - Next.js (React framework)
 - React (frontend UI library)
 - Backend: MongoDB (data store; server framework TBD)
 
-## Getting Started
+1. Open a terminal and change into the project folder:
 
-### 1. Clone the Repository
+2. Install dependencies:
 
-```sh
-git clone git@github.com:SWE6633-Group3/TrakIt.git
-```
-
-### 2. Install Dependencies
-
-```sh
+```bash
 npm install
 ```
 
-### 3. Start the Development Server
+If you use yarn:
 
-```sh
-npm run dev
+```bash
+yarn install
 ```
 
-The app will be available at `http://localhost:3000`.
+Or pnpm:
 
-## Backend And Database
+```bash
+pnpm install
+```
 
-The backend and database stack are not selected yet. This section will be updated once the team decides on the server framework and data store.
+## Available scripts (from package.json)
 
-## Testing
+This project includes the following npm scripts. Run them from the project root.
 
-Testing frameworks are not selected yet. This section will be updated once the team decides on unit and end-to-end testing tools.
+- `npm run dev` — Start the Next.js development server (default: http://localhost:3000).
+- `npm run build` — Build the app for production (runs Next.js build).
+- `npm start` — Start the production server after building the app.
+- `npm run lint` — Run ESLint.
+- `npm run start-dev` — Start the development server for both the app (http://localhost:3000) and the server (http://localhost:3001)
 
-## Additional Commands
+Examples:
 
-| Command             | Description                          |
-| ------------------- | ------------------------------------ |
-| `npm run dev`       | Start development server             |
-| `npm run build`     | Build for production                 |
-| `npm run start`     | Start production server              |
-| `npm run test`      | Run tests (framework TBD)            |
+```bash
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server (after build)
+npm start
+
+# Run linter
+npm run lint
+
+# Start app and server development servers
+npm run start-dev
+```
+
+## TypeScript and Tailwind
+
+- This project is configured to use TypeScript. tsconfig.json is present in the repo.
+- Tailwind CSS and PostCSS are configured (see `tailwind.config` and `postcss.config.mjs` files in the repo).
+
+No additional setup is required to use TypeScript or Tailwind beyond installing dependencies.
+
+## Environment variables
+
+If your app requires environment variables, create a `.env.local` file in the project root. Example:
+
+```env
+# .env.local
+NEXT_PUBLIC_API_URL=https://api.example.com
+```
+
+Next.js automatically loads `.env.local` during development.
+
+## Troubleshooting
+
+If you run into problems:
+
+- Remove existing node modules and lockfile then reinstall:
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+- Clear Next.js cache by removing `.next` then rebuild:
+
+```bash
+rm -rf .next
+npm run build
+```
+
+- Ensure Node.js version meets the prerequisite.
 
 ## Contributing
 
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature-branch`.
-3. Commit your changes: `git commit -m "Add new feature"`.
-4. Push the branch: `git push origin feature-branch`.
-5. Open a pull request.
+Pull requests and issues are welcome. Keep changes small and include tests or steps to reproduce when relevant.
 
-## Need Help
+## License
 
-Open an issue in the repository or contact the team.
+This repository does not specify a license. Add a LICENSE file if you intend to publish or share the project with an open-source license.
