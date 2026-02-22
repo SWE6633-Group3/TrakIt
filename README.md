@@ -4,6 +4,71 @@ TrakIt is a lightweight project management system that tracks software projects,
 
 See `README.app.md` for details on how to set up and run the app.
 
+## Quick Start (Local Development)
+
+### Prerequisites
+
+- Node.js 18+ (LTS recommended)
+- npm
+- MongoDB running locally (default: `mongodb://localhost:27017`)
+
+### MongoDB with Docker (Recommended for local setup)
+
+Start MongoDB container:
+
+```bash
+docker run -d --name trakit-mongo -p 27017:27017 mongo:7
+```
+
+Useful follow-up commands:
+
+```bash
+# start existing container
+docker start trakit-mongo
+
+# stop container
+docker stop trakit-mongo
+
+# view logs
+docker logs -f trakit-mongo
+```
+
+### 1. Install dependencies
+
+```bash
+pnpm install # We highly recommend“pnpm”, this can solve the npm hell dependency checking problem
+```
+
+If your machine uses a mirror registry and install fails with a package `404`, use:
+
+```bash
+npm install --registry=https://registry.npmjs.org
+```
+
+### 2. Configure environment variables
+
+Copy `.env.example` to `.env` and adjust values if needed:
+
+```bash
+cp .env.example .env
+```
+
+### 3. Start the project
+
+```bash
+npm run start-dev
+```
+
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:3001`
+- Health check: `http://localhost:3001/api/health`
+
+### Common startup checks
+
+- If backend exits with `ECONNREFUSED 127.0.0.1:27017`, start MongoDB first.
+- If `concurrently: command not found`, re-run `npm install`.
+- If ports are occupied, stop the conflicting process or change ports in `.env`.
+
 ## Team Information
 
 **Team Name:** Group 3  
