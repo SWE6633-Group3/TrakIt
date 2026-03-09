@@ -11,12 +11,8 @@ npm -v
 ```
 
 ## Install
-- Next.js (React framework)
-- React (frontend UI library)
-- Backend: MongoDB (data store; server framework TBD)
 
-1. Open a terminal and change into the project folder:
-
+1. Open a terminal and change into the project folder.
 2. Install dependencies:
 
 ```bash
@@ -43,7 +39,9 @@ This project includes the following npm scripts. Run them from the project root.
 - `npm run build` — Build the app for production (runs Next.js build).
 - `npm start` — Start the production server after building the app.
 - `npm run lint` — Run ESLint.
-- `npm run start-dev` — Start the development server for both the app (http://localhost:3000) and the server (http://localhost:3001)
+- `npm run server` — Start the backend server (http://localhost:3001) with nodemon + tsx.
+- `npm run seed` — Seed the SQLite database with sample data.
+- `npm run start-dev` — Start the app (http://localhost:3000) and the server (http://localhost:3001).
 
 Examples:
 
@@ -51,62 +49,62 @@ Examples:
 # Start development server
 npm run dev
 
-# Build for production
-npm run build
+# Start backend server
+npm run server
 
-# Start production server (after build)
-npm start
+# Seed the database
+npm run seed
 
-# Run linter
-npm run lint
-
-# Start app and server development servers
+# Start app and server together
 npm run start-dev
 ```
 
 ## TypeScript and Tailwind
 
-- This project is configured to use TypeScript. tsconfig.json is present in the repo.
-- Tailwind CSS and PostCSS are configured (see `tailwind.config` and `postcss.config.mjs` files in the repo).
-
-No additional setup is required to use TypeScript or Tailwind beyond installing dependencies.
+- This project is configured to use TypeScript. `tsconfig.json` is present in the repo.
+- Tailwind CSS and PostCSS are configured (see `tailwind.config.ts` and `postcss.config.mjs` files in the repo).
 
 ## Environment variables
 
-If your app requires environment variables, create a `.env.local` file in the project root. Example:
+Create a `.env` file in the project root for backend settings:
 
 ```env
-# .env.local
-NEXT_PUBLIC_API_URL=https://api.example.com
+PORT=3001
+SQLITE_DB=trackit.db
 ```
 
-Next.js automatically loads `.env.local` during development.
+Create a `.env.local` file in the project root for frontend settings:
 
-## Backend Setup & testing
+```env
+NEXT_PUBLIC_API_BASE=http://localhost:3001
+```
 
-The backend runs as a spearate Express server on port 3001.
+## Backend setup
 
-1. **Environment Setup**: Create a `.env` file in the root (separate from `.env.local`) with the following:
-   ```env
-   PORT=3001
-   MONGO_URI=mongodb://localhost:27017
-   MONGO_DB=trackit
-   ```
-   
-2. **Run Backend Individually**: If you only want to test the server without the frontend:
+The backend runs as a separate Express server on port 3001 and uses SQLite as the data store.
+
+1. Start the backend:
    ```bash
-   npx tsx server/server.ts
+   npm run server
    ```
-   
-3. **Verify Health**: Once the server is running, visit `http://localhost:3001/api/health` in your browser. You should receive a JSON response:
-   ```json
-   {
-     "status": "success",
-     "message": "Backend server is running",
-     "port": 3001
-   }
+2. Verify health:
+   ```bash
+   curl http://localhost:3001/api/health
    ```
-   
+
+## Seeding data
+
+Seed the database (this will delete existing data and insert fresh records):
+
+```bash
+npm run seed
+```
+
+The seed script creates:
+- Users (including the class roster + 5 mock users)
+- 4 projects with detailed descriptions
+- Requirements, risks, and project users (lead + members)
+
 ## Troubleshooting
 
 If you run into problems:
