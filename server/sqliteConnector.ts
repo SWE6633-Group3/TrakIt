@@ -88,8 +88,15 @@ export async function connectToDatabase(filename: string) {
       title TEXT NOT NULL,
       type TEXT NOT NULL,
       status TEXT NOT NULL,
+      assigned_user_id INTEGER,
+      req_analysis_hours INTEGER,
+      design_hours INTEGER,
+      coding_hours INTEGER,
+      testing_hours INTEGER,
+      proj_mgmt_hours INTEGER,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+      FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL
     );
 
     CREATE TABLE IF NOT EXISTS risks (

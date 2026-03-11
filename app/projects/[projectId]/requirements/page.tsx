@@ -12,6 +12,12 @@ type Requirement = {
   project_id: number;
   title: string;
   type: string;
+  assigned_user_id: number | null;
+  req_analysis_hours: number | null;
+  design_hours: number | null;
+  coding_hours: number | null;
+  testing_hours: number | null;
+  proj_mgmt_hours: number | null;
   status: string;
 };
 
@@ -22,6 +28,7 @@ export default function ProjectRequirementsPage() {
     if (!raw) return NaN;
     return Number.parseInt(raw, 10);
   }, [params]);
+  const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [title, setTitle] = useState("");
   const [type, setType] = useState("Functional");
@@ -30,6 +37,12 @@ export default function ProjectRequirementsPage() {
   const [editingTitle, setEditingTitle] = useState("");
   const [editingType, setEditingType] = useState("Functional");
   const [editingStatus, setEditingStatus] = useState("Draft");
+  const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
+  const [reqAnalysisHours, setReqAnalysisHours] = useState<number | null>(null);
+  const [designHours, setDesignHours] = useState<number | null>(null);
+  const [codingHours, setCodingHours] = useState<number | null>(null);
+  const [testingHours, setTestingHours] = useState<number | null>(null);
+  const [projMgmtHours, setProjMgmtHours] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [currentRole, setCurrentRole] = useState<"Lead" | "Member" | null>(
@@ -84,8 +97,28 @@ export default function ProjectRequirementsPage() {
       });
   };
 
+  const loadUsers = () => {
+    return fetch(`${API_BASE}/api/users`)
+      .then(async (response) => {
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          const message = payload?.error ?? "Unable to load users.";
+          throw new Error(message);
+        }
+        return response.json();
+      })
+      .then((payload) => {
+        setUsers(payload?.users ?? []);
+      })
+      .catch((error: Error) => {
+        setErrorMessage(error.message);
+        return [];
+      });
+  }
+
   useEffect(() => {
     loadRequirements();
+    loadUsers();
   }, [projectId]);
 
   const handleCreate = (event: React.FormEvent<HTMLFormElement>) => {
@@ -251,6 +284,79 @@ export default function ProjectRequirementsPage() {
               <option>Approved</option>
               <option>In review</option>
             </select>
+            <select
+              value={assignedUserId ?? ""}
+              onChange={(event) =>
+                setAssignedUserId(
+                  event.target.value
+                    ? Number.parseInt(event.target.value, 10)
+                    : null
+                )
+              }
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            >
+              <option value="">Unassigned</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={0}
+              step="0.5"
+              value={reqAnalysisHours ?? ""}
+              onChange={(e) => {
+                const v = e.currentTarget.value;
+                setReqAnalysisHours(v === "" ? null : Number(v));
+              }}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <input
+              type="number"
+              min={0}
+              step="0.5"
+              value={designHours ?? ""}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setDesignHours(v === "" ? null : Number(v));
+                }}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <input
+              type="number"
+              min={0}
+              step="0.5"
+              value={codingHours ?? ""}
+              onChange={(e) => {
+                const v = e.currentTarget.value;
+                setCodingHours(v === "" ? null : Number(v));
+              }}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <input
+              type="number"
+              min={0}
+              step="0.5"
+              value={testingHours ?? ""}
+              onChange={(e) => {
+                const v = e.currentTarget.value;
+                setTestingHours(v === "" ? null : Number(v));
+              }}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <input
+              type="number"
+              min={0}
+              step="0.5"
+              value={projMgmtHours ?? ""}
+              onChange={(e) => {
+                const v = e.currentTarget.value;
+                setProjMgmtHours(v === "" ? null : Number(v));
+              }}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
             <button
               type="submit"
               className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
@@ -300,6 +406,79 @@ export default function ProjectRequirementsPage() {
                     <option>Approved</option>
                     <option>In review</option>
                   </select>
+                  <select
+                    value={assignedUserId ?? ""}
+                    onChange={(event) =>
+                      setAssignedUserId(
+                        event.target.value
+                          ? Number.parseInt(event.target.value, 10)
+                          : null
+                      )
+                    }
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  >
+                    <option value="">Unassigned</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.5"
+                    value={reqAnalysisHours ?? ""}
+                    onChange={(e) => {
+                      const v = e.currentTarget.value;
+                      setReqAnalysisHours(v === "" ? null : Number(v));
+                    }}
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.5"
+                    value={designHours ?? ""}
+                      onChange={(e) => {
+                        const v = e.currentTarget.value;
+                        setDesignHours(v === "" ? null : Number(v));
+                      }}
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.5"
+                    value={codingHours ?? ""}
+                    onChange={(e) => {
+                      const v = e.currentTarget.value;
+                      setCodingHours(v === "" ? null : Number(v));
+                    }}
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.5"
+                    value={testingHours ?? ""}
+                    onChange={(e) => {
+                      const v = e.currentTarget.value;
+                      setTestingHours(v === "" ? null : Number(v));
+                    }}
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.5"
+                    value={projMgmtHours ?? ""}
+                    onChange={(e) => {
+                      const v = e.currentTarget.value;
+                      setProjMgmtHours(v === "" ? null : Number(v));
+                    }}
+                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  />
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
