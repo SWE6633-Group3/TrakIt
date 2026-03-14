@@ -23,6 +23,18 @@ export const getUsers = async (req: Request, res: Response) => {
     }
 };
 
+export const getProjectUsers = async (req: Request, res: Response) => {
+    try {
+        const db = getDb();
+        const projectId = req.params.projectId;
+        const projectUsers = await db.collection('project_users').find({ project_id: projectId }).toArray();
+        res.status(200).json(projectUsers);
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+        res.status(500).json({ message: errorMessage });
+    };
+};
+
 export const createProject = async (req: Request, res: Response) => {
     try {
         const db = getDb();

@@ -21,6 +21,12 @@ type Requirement = {
   status: string;
 };
 
+type ProjectUser = {
+  id: number;
+  name: string;
+  role: "Lead" | "Member";
+};
+
 export default function ProjectRequirementsPage() {
   const params = useParams<{ projectId?: string }>();
   const projectId = useMemo(() => {
@@ -28,7 +34,7 @@ export default function ProjectRequirementsPage() {
     if (!raw) return NaN;
     return Number.parseInt(raw, 10);
   }, [params]);
-  const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
+  const [users, setUsers] = useState<ProjectUser[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [title, setTitle] = useState("");
   const [type, setType] = useState("Functional");
@@ -74,6 +80,7 @@ export default function ProjectRequirementsPage() {
       })
       .then((payload) => {
         const users = payload?.users ?? [];
+        setUsers(users);
         const currentUser = currentUserId
           ? users.find((user: { id: number; role?: string }) => user.id === currentUserId)
           : null;
@@ -103,28 +110,8 @@ export default function ProjectRequirementsPage() {
       });
   };
 
-  const loadUsers = () => {
-    return fetch(`${API_BASE}/api/users`)
-      .then(async (response) => {
-        if (!response.ok) {
-          const payload = await response.json().catch(() => ({}));
-          const message = payload?.error ?? "Unable to load users.";
-          throw new Error(message);
-        }
-        return response.json();
-      })
-      .then((payload) => {
-        setUsers(payload?.users ?? []);
-      })
-      .catch((error: Error) => {
-        setErrorMessage(error.message);
-        return [];
-      });
-  }
-
   useEffect(() => {
     loadRequirements();
-    loadUsers();
   }, [projectId]);
 
   const handleCreate = (event: React.FormEvent<HTMLFormElement>) => {
