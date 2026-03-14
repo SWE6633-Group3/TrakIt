@@ -403,7 +403,7 @@ app.get('/api/projects/:projectId/requirements', async (req, res) => {
   try {
     const db = getDb();
     const requirements = await db.all(
-      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE project_id = ? ORDER BY id DESC;',
+      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours, created_at FROM requirements WHERE project_id = ? ORDER BY id DESC;',
       projectId
     );
     res.json({ requirements });
@@ -415,7 +415,7 @@ app.get('/api/projects/:projectId/requirements', async (req, res) => {
 
 app.post('/api/projects/:projectId/requirements', async (req, res) => {
   const projectId = Number(req.params.projectId ?? 0);
-  const { title, type, status } = req.body ?? {};
+  const { title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours } = req.body ?? {};
   if (!projectId || !title || !type || !status) {
     return res.status(400).json({ error: 'projectId, title, type, and status are required' });
   }
@@ -423,18 +423,24 @@ app.post('/api/projects/:projectId/requirements', async (req, res) => {
   try {
     const db = getDb();
     const result = await db.run(
-      'INSERT INTO requirements (project_id, title, type, status) VALUES (?, ?, ?, ?);',
+      'INSERT INTO requirements (project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
       projectId,
       title,
       type,
-      status
+      status,
+      assigned_user_id ?? null,
+      req_analysis_hours ?? 0,
+      design_hours ?? 0,
+      coding_hours ?? 0,
+      testing_hours ?? 0,
+      proj_mgmt_hours ?? 0
     );
     const requirementId = result.lastID;
     if (!requirementId) {
       throw new Error('Failed to create requirement.');
     }
     const requirement = await db.get(
-      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE id = ?;',
+      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours, created_at FROM requirements WHERE id = ?;',
       requirementId
     );
     res.status(201).json({ requirement });
@@ -446,7 +452,7 @@ app.post('/api/projects/:projectId/requirements', async (req, res) => {
 
 app.put('/api/requirements/:id', async (req, res) => {
   const id = Number(req.params.id ?? 0);
-  const { title, type, status } = req.body ?? {};
+  const { title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours } = req.body ?? {};
   if (!id || !title || !type || !status) {
     return res.status(400).json({ error: 'id, title, type, and status are required' });
   }
@@ -454,14 +460,20 @@ app.put('/api/requirements/:id', async (req, res) => {
   try {
     const db = getDb();
     await db.run(
-      'UPDATE requirements SET title = ?, type = ?, status = ? WHERE id = ?;',
+      'UPDATE requirements SET title = ?, type = ?, status = ?, assigned_user_id = ?, req_analysis_hours = ?, design_hours = ?, coding_hours = ?, testing_hours = ?, proj_mgmt_hours = ? WHERE id = ?;',
       title,
       type,
       status,
+      assigned_user_id ?? null,
+      req_analysis_hours ?? 0,
+      design_hours ?? 0,
+      coding_hours ?? 0,
+      testing_hours ?? 0,
+      proj_mgmt_hours ?? 0,
       id
     );
     const requirement = await db.get(
-      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE id = ?;',
+      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours, created_at FROM requirements WHERE id = ?;',
       id
     );
     res.json({ requirement });

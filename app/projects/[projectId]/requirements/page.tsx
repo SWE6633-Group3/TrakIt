@@ -38,11 +38,17 @@ export default function ProjectRequirementsPage() {
   const [editingType, setEditingType] = useState("Functional");
   const [editingStatus, setEditingStatus] = useState("Draft");
   const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
-  const [reqAnalysisHours, setReqAnalysisHours] = useState<number | null>(null);
-  const [designHours, setDesignHours] = useState<number | null>(null);
-  const [codingHours, setCodingHours] = useState<number | null>(null);
-  const [testingHours, setTestingHours] = useState<number | null>(null);
-  const [projMgmtHours, setProjMgmtHours] = useState<number | null>(null);
+  const [reqAnalysisHours, setReqAnalysisHours] = useState<number>(0);
+  const [designHours, setDesignHours] = useState<number>(0);
+  const [codingHours, setCodingHours] = useState<number>(0);
+  const [testingHours, setTestingHours] = useState<number>(0);
+  const [projMgmtHours, setProjMgmtHours] = useState<number>(0);
+  const [editAssignedUserId, setEditAssignedUserId] = useState<number | null>(null);
+  const [editReqAnalysisHours, setEditReqAnalysisHours] = useState<number>(0);
+  const [editDesignHours, setEditDesignHours] = useState<number>(0);
+  const [editCodingHours, setEditCodingHours] = useState<number>(0);
+  const [editTestingHours, setEditTestingHours] = useState<number>(0);
+  const [editProjMgmtHours, setEditProjMgmtHours] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [currentRole, setCurrentRole] = useState<"Lead" | "Member" | null>(
@@ -140,7 +146,17 @@ export default function ProjectRequirementsPage() {
     fetch(`${API_BASE}/api/projects/${projectId}/requirements`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, type, status }),
+      body: JSON.stringify({ 
+        title,
+        type,
+        status,
+        assigned_user_id: assignedUserId,
+        req_analysis_hours: reqAnalysisHours,
+        design_hours: designHours,
+        coding_hours: codingHours,
+        testing_hours: testingHours,
+        proj_mgmt_hours: projMgmtHours
+      }),
     })
       .then(async (response) => {
         if (!response.ok) {
@@ -154,6 +170,12 @@ export default function ProjectRequirementsPage() {
         setTitle("");
         setType("Functional");
         setStatus("Draft");
+        setAssignedUserId(null);
+        setReqAnalysisHours(0);
+        setDesignHours(0);
+        setCodingHours(0);
+        setTestingHours(0);
+        setProjMgmtHours(0);
         loadRequirements();
       })
       .catch((error: Error) => {
@@ -166,6 +188,12 @@ export default function ProjectRequirementsPage() {
     setEditingTitle(item.title);
     setEditingType(item.type);
     setEditingStatus(item.status);
+    setEditAssignedUserId(item.assigned_user_id);
+    setEditReqAnalysisHours(item.req_analysis_hours ?? 0 );
+    setEditDesignHours(item.design_hours ?? 0);
+    setEditCodingHours(item.coding_hours ?? 0);
+    setEditTestingHours(item.testing_hours ?? 0);
+    setEditProjMgmtHours(item.proj_mgmt_hours ?? 0);
   };
 
   const cancelEdit = () => {
@@ -173,6 +201,12 @@ export default function ProjectRequirementsPage() {
     setEditingTitle("");
     setEditingType("Functional");
     setEditingStatus("Draft");
+    setEditAssignedUserId(null);
+    setEditReqAnalysisHours(0);
+    setEditDesignHours(0);
+    setEditCodingHours(0);
+    setEditTestingHours(0);
+    setEditProjMgmtHours(0);
   };
 
   const saveEdit = (itemId: number) => {
@@ -191,6 +225,12 @@ export default function ProjectRequirementsPage() {
         title: editingTitle,
         type: editingType,
         status: editingStatus,
+        assigned_user_id: editAssignedUserId,
+        req_analysis_hours: editReqAnalysisHours,
+        design_hours: editDesignHours,
+        coding_hours: editCodingHours,
+        testing_hours: editTestingHours,
+        proj_mgmt_hours: editProjMgmtHours
       }),
     })
       .then(async (response) => {
@@ -309,7 +349,7 @@ export default function ProjectRequirementsPage() {
               value={reqAnalysisHours ?? ""}
               onChange={(e) => {
                 const v = e.currentTarget.value;
-                setReqAnalysisHours(v === "" ? null : Number(v));
+                setReqAnalysisHours(Number(v));
               }}
               className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
@@ -320,7 +360,7 @@ export default function ProjectRequirementsPage() {
               value={designHours ?? ""}
                 onChange={(e) => {
                   const v = e.currentTarget.value;
-                  setDesignHours(v === "" ? null : Number(v));
+                  setDesignHours(Number(v));
                 }}
               className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
@@ -328,10 +368,10 @@ export default function ProjectRequirementsPage() {
               type="number"
               min={0}
               step="0.5"
-              value={codingHours ?? ""}
+              value={codingHours}
               onChange={(e) => {
                 const v = e.currentTarget.value;
-                setCodingHours(v === "" ? null : Number(v));
+                setCodingHours(Number(v));
               }}
               className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
@@ -342,7 +382,7 @@ export default function ProjectRequirementsPage() {
               value={testingHours ?? ""}
               onChange={(e) => {
                 const v = e.currentTarget.value;
-                setTestingHours(v === "" ? null : Number(v));
+                setTestingHours(Number(v));
               }}
               className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
@@ -353,7 +393,7 @@ export default function ProjectRequirementsPage() {
               value={projMgmtHours ?? ""}
               onChange={(e) => {
                 const v = e.currentTarget.value;
-                setProjMgmtHours(v === "" ? null : Number(v));
+                setProjMgmtHours(Number(v));
               }}
               className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
@@ -407,9 +447,9 @@ export default function ProjectRequirementsPage() {
                     <option>In review</option>
                   </select>
                   <select
-                    value={assignedUserId ?? ""}
+                    value={editAssignedUserId ?? ""}
                     onChange={(event) =>
-                      setAssignedUserId(
+                      setEditAssignedUserId(
                         event.target.value
                           ? Number.parseInt(event.target.value, 10)
                           : null
@@ -428,10 +468,10 @@ export default function ProjectRequirementsPage() {
                     type="number"
                     min={0}
                     step="0.5"
-                    value={reqAnalysisHours ?? ""}
+                    value={editReqAnalysisHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
-                      setReqAnalysisHours(v === "" ? null : Number(v));
+                      setEditReqAnalysisHours(Number(v));
                     }}
                     className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   />
@@ -439,10 +479,10 @@ export default function ProjectRequirementsPage() {
                     type="number"
                     min={0}
                     step="0.5"
-                    value={designHours ?? ""}
+                    value={editDesignHours ?? ""}
                       onChange={(e) => {
                         const v = e.currentTarget.value;
-                        setDesignHours(v === "" ? null : Number(v));
+                        setEditDesignHours(Number(v));
                       }}
                     className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   />
@@ -450,10 +490,10 @@ export default function ProjectRequirementsPage() {
                     type="number"
                     min={0}
                     step="0.5"
-                    value={codingHours ?? ""}
+                    value={editCodingHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
-                      setCodingHours(v === "" ? null : Number(v));
+                      setEditCodingHours(Number(v));
                     }}
                     className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   />
@@ -461,10 +501,10 @@ export default function ProjectRequirementsPage() {
                     type="number"
                     min={0}
                     step="0.5"
-                    value={testingHours ?? ""}
+                    value={editTestingHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
-                      setTestingHours(v === "" ? null : Number(v));
+                      setEditTestingHours(Number(v));
                     }}
                     className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   />
@@ -472,10 +512,10 @@ export default function ProjectRequirementsPage() {
                     type="number"
                     min={0}
                     step="0.5"
-                    value={projMgmtHours ?? ""}
+                    value={editProjMgmtHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
-                      setProjMgmtHours(v === "" ? null : Number(v));
+                      setEditProjMgmtHours(Number(v));
                     }}
                     className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   />
