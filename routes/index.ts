@@ -1,11 +1,17 @@
 import express from 'express';
-import { getHealth } from '../controllers/healthController.js';
-import { getProjects, createProject } from '../controllers/projectController.js';
+import { 
+    getProjectMembers, 
+    addProjectMember, 
+    updateMemberRole, 
+    removeProjectMember 
+} from '../controllers/teamController.js';
 
 const router = express.Router();
 
-router.get('/health', getHealth);
-router.get('/projects', getProjects);
-router.post('/projects', createProject);
+// Team Management Routes
+router.get('/projects/:id/members', getProjectMembers);
+router.post('/projects/:id/members', addProjectMember);
+router.put('/projects/:projectId/members/:userId', updateMemberRole);
+router.delete('/projects/:projectId/members/:userId', removeProjectMember);
 
 export default router;
