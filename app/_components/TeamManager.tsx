@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface Member {
   id: number;
@@ -10,20 +10,29 @@ interface Member {
 
 export default function TeamManager({ projectId }: { projectId: number }) {
   const [members, setMembers] = useState<Member[]>([]);
-  const [newUserEmail, setNewUserEmail] = useState(''); // Updated to Email
+  const [newUserEmail, setNewUserEmail] = useState('');
   const [newRole, setNewRole] = useState('Member');
 
-  const fetchMembers = async () => {
-    const res = await fetch(`/api/projects/${projectId}/members`);
-    const data = await res.json();
-    setMembers(data);
-  };
+  // Wrapped in useCallback to prevent unnecessary re-renders and satisfy linting
+  const fetchMembers = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/projects/${projectId}/members`);
+      const data = await res.json();
+      setMembers(data);
+    } catch (error) {
+      console.error("Failed to fetch members:", error);
+    }
+  }, [projectId]);
 
-  useEffect(() => { fetchMembers(); }, [projectId]);
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchMembers();
+    };
+    loadData();
+  }, [fetchMembers]);
 
   const addMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    // This sends the email to your backend
     const res = await fetch(`/api/projects/${projectId}/members`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -47,7 +56,6 @@ export default function TeamManager({ projectId }: { projectId: number }) {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      {/* MATCHES YOUR SCREENSHOT INPUT AREA */}
       <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <form onSubmit={addMember} className="flex items-center gap-4">
           <div className="flex-1">
@@ -76,7 +84,6 @@ export default function TeamManager({ projectId }: { projectId: number }) {
         <p className="mt-3 text-gray-400 text-sm ml-1">Existing user required</p>
       </div>
 
-      {/* MATCHES YOUR MEMBER CARD LIST */}
       <div className="space-y-3">
         {members.map((member) => (
           <div key={member.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center group hover:border-blue-200 transition-all">

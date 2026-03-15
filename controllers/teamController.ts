@@ -20,7 +20,6 @@ export const addProjectMember = async (req: Request, res: Response) => {
         );
 
         if (!user) {
-            // Matches the "user not found" message in your UI screenshot
             return res.status(404).json({ error: 'user not found' });
         }
 
@@ -33,11 +32,13 @@ export const addProjectMember = async (req: Request, res: Response) => {
         );
 
         res.status(201).json({ message: 'Member added successfully' });
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error adding member:', error);
         
-        // Specific check for existing members (preventing duplicates)
-        if (error.message?.includes('UNIQUE constraint')) {
+        // Use a type guard or cast locally to avoid the "no-explicit-any" error
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        
+        if (errorMessage.includes('UNIQUE constraint')) {
             return res.status(400).json({ error: 'User is already a member of this project' });
         }
         
