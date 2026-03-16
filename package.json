@@ -8,9 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "server": "nodemon --watch server --exec \"tsx server/server.ts\"",
-    "seed": "tsx server/seed.ts",
-    "start-dev": "concurrently \"npm run server APP_ENV=development\" \"npm run dev\" "
+    "server": "nodemon --watch server --exec \"node --experimental-sqlite --import tsx server/server.ts\"",
+    "seed": "node --experimental-sqlite --import tsx server/seed.ts",
+    "start-dev": "concurrently \"npm run server\" \"npm run dev\""
   },
   "dependencies": {
     "antd": "^6.3.0",

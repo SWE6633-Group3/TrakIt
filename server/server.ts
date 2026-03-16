@@ -3,7 +3,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import { connectToDatabase, getDb } from './sqliteConnector.js';
-import routes from '../routes/index.js';
 
 dotenv.config();
 
@@ -11,9 +10,54 @@ const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
 const SQLITE_DB = process.env.SQLITE_DB ?? 'trackit.db';
 
+const parseTeamMembers = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((member) => String(member ?? '').trim())
+    .filter(Boolean);
+};
+
+const parseStoredTeamMembers = (value: unknown) => {
+  if (typeof value !== 'string' || !value.trim()) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed
+          .map((member) => String(member ?? '').trim())
+          .filter(Boolean)
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+const hydrateProject = <
+  T extends {
+    team_members_json?: string | null;
+    [key: string]: unknown;
+  },
+>(
+  project: T | undefined
+) => {
+  if (!project) {
+    return project;
+  }
+
+  const { team_members_json, ...rest } = project;
+  return {
+    ...rest,
+    team_members: parseStoredTeamMembers(team_members_json),
+  };
+};
+
 app.use(cors());
 app.use(express.json());
-app.use('/api', routes);
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.originalUrl} from ${req.ip}`);
@@ -166,6 +210,8 @@ app.get('/api/projects-summary', async (req, res) => {
         p.id,
         p.name,
         p.description,
+        p.manager_name,
+        p.team_members_json,
         p.owner_user_id,
         p.created_at,
         pu.role as current_user_role,
@@ -178,7 +224,7 @@ app.get('/api/projects-summary', async (req, res) => {
        ORDER BY p.id DESC;`,
       ownerUserId
     );
-    res.json({ projects });
+    res.json({ projects: projects.map((project) => hydrateProject(project)) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -194,13 +240,13 @@ app.get('/api/projects/:id', async (req, res) => {
   try {
     const db = getDb();
     const project = await db.get(
-      'SELECT id, name, description, owner_user_id, created_at FROM projects WHERE id = ?;',
+      'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
       id
     );
     if (!project) {
       return res.status(404).json({ error: 'project not found' });
     }
-    res.json({ project });
+    res.json({ project: hydrateProject(project) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -208,17 +254,20 @@ app.get('/api/projects/:id', async (req, res) => {
 });
 
 app.post('/api/projects', async (req, res) => {
-  const { name, description, ownerUserId } = req.body ?? {};
+  const { name, description, managerName, teamMembers, ownerUserId } = req.body ?? {};
   if (!name || !ownerUserId) {
     return res.status(400).json({ error: 'name and ownerUserId are required' });
   }
 
   try {
     const db = getDb();
+    const normalizedTeamMembers = parseTeamMembers(teamMembers);
     const result = await db.run(
-      'INSERT INTO projects (name, description, owner_user_id) VALUES (?, ?, ?);',
+      'INSERT INTO projects (name, description, manager_name, team_members_json, owner_user_id) VALUES (?, ?, ?, ?, ?);',
       name,
       description ?? null,
+      managerName ?? null,
+      JSON.stringify(normalizedTeamMembers),
       ownerUserId
     );
     const projectId = result.lastID;
@@ -232,10 +281,10 @@ app.post('/api/projects', async (req, res) => {
       'Lead'
     );
     const project = await db.get(
-      'SELECT id, name, description, owner_user_id, created_at FROM projects WHERE id = ?;',
+      'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
       projectId
     );
-    res.status(201).json({ project });
+    res.status(201).json({ project: hydrateProject(project) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -244,24 +293,54 @@ app.post('/api/projects', async (req, res) => {
 
 app.put('/api/projects/:id', async (req, res) => {
   const id = Number(req.params.id ?? 0);
-  const { name, description } = req.body ?? {};
+  const payload = req.body ?? {};
+  const { name } = payload;
   if (!id || !name) {
     return res.status(400).json({ error: 'id and name are required' });
   }
 
   try {
     const db = getDb();
+    const currentProject = await db.get<{
+      description: string | null;
+      manager_name: string | null;
+      team_members_json: string | null;
+    }>(
+      'SELECT description, manager_name, team_members_json FROM projects WHERE id = ?;',
+      id
+    );
+    if (!currentProject) {
+      return res.status(404).json({ error: 'project not found' });
+    }
+
+    const hasDescription = Object.prototype.hasOwnProperty.call(
+      payload,
+      'description'
+    );
+    const hasManagerName = Object.prototype.hasOwnProperty.call(
+      payload,
+      'managerName'
+    );
+    const hasTeamMembers = Object.prototype.hasOwnProperty.call(
+      payload,
+      'teamMembers'
+    );
+
     await db.run(
-      'UPDATE projects SET name = ?, description = ? WHERE id = ?;',
+      'UPDATE projects SET name = ?, description = ?, manager_name = ?, team_members_json = ? WHERE id = ?;',
       name,
-      description ?? null,
+      hasDescription ? payload.description ?? null : currentProject.description,
+      hasManagerName ? payload.managerName ?? null : currentProject.manager_name,
+      hasTeamMembers
+        ? JSON.stringify(parseTeamMembers(payload.teamMembers))
+        : currentProject.team_members_json ?? '[]',
       id
     );
     const project = await db.get(
-      'SELECT id, name, description, owner_user_id, created_at FROM projects WHERE id = ?;',
+      'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
       id
     );
-    res.json({ project });
+    res.json({ project: hydrateProject(project) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
