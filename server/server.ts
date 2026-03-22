@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import { connectToDatabase, getDb } from './sqliteConnector.js';
+import routes from '../routes/index.js';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const SQLITE_DB = process.env.SQLITE_DB ?? 'trackit.db';
 
 app.use(cors());
 app.use(express.json());
+app.use('/api', routes);
 
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.originalUrl} from ${req.ip}`);

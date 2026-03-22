@@ -1,6 +1,6 @@
 import { MongoClient, Db } from 'mongodb';
 
-let db: Db | null = null;
+let db: null;
 let client: MongoClient | null = null;
 
 export async function connectToDatabase(uri: string, dbName: string) {
