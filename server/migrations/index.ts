@@ -2,13 +2,13 @@ export type Migration = {
   id: string;
   up: (db: {
     exec: (sql: string) => Promise<void>;
-    run: (sql: string, ...params: unknown[]) => Promise<{ lastID?: number }>;
-    all: <T>(sql: string, ...params: unknown[]) => Promise<T[]>;
+    run: (sql: string, ...params: never[]) => Promise<{ lastID?: number }>;
+    all: <T>(sql: string, ...params: never[]) => Promise<T[]>;
   }) => Promise<void>;
 };
 
 const ensureColumn = async (
-  db: { all: <T>(sql: string, ...params: unknown[]) => Promise<T[]> },
+  db: { all: <T>(sql: string, ...params: never[]) => Promise<T[]> },
   table: string,
   column: string
 ) => {
