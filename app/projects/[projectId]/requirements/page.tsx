@@ -196,6 +196,20 @@ export default function ProjectRequirementsPage() {
     setEditProjMgmtHours(0);
   };
 
+  const hasEditChanges = (item: Requirement) => {
+    return (
+      editingTitle !== item.title ||
+      editingType !== item.type ||
+      editingStatus !== item.status ||
+      editAssignedUserId !== item.assigned_user_id ||
+      editReqAnalysisHours !== (item.req_analysis_hours ?? 0) ||
+      editDesignHours !== (item.design_hours ?? 0) ||
+      editCodingHours !== (item.coding_hours ?? 0) ||
+      editTestingHours !== (item.testing_hours ?? 0) ||
+      editProjMgmtHours !== (item.proj_mgmt_hours ?? 0)
+    );
+  };
+
   const saveEdit = (itemId: number) => {
     if (hasAccess === false) {
       setErrorMessage("You are not on this project team.");
@@ -304,7 +318,7 @@ export default function ProjectRequirementsPage() {
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                 required
               />
-              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirement Title</label>
+              <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Requirement Title</label>
             </div>
             <select
               value={type}
@@ -353,7 +367,7 @@ export default function ProjectRequirementsPage() {
                 }}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
-              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirements Analysis Hours</label>
+              <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Requirements Analysis Hours</label>
             </div>
             <div className="relative">
               <input
@@ -367,7 +381,7 @@ export default function ProjectRequirementsPage() {
                   }}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
-              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Design Hours</label>
+              <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Design Hours</label>
             </div>
             <div className="relative">
               <input
@@ -381,7 +395,7 @@ export default function ProjectRequirementsPage() {
                 }}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
-              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Coding Hours</label>
+              <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Coding Hours</label>
             </div>
             <div className="relative">
               <input
@@ -395,7 +409,7 @@ export default function ProjectRequirementsPage() {
                 }}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
-              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Testing Hours</label>
+              <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Testing Hours</label>
             </div>
             <div className="relative">
               <input
@@ -409,7 +423,7 @@ export default function ProjectRequirementsPage() {
                 }}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
               />
-              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Project Management Hours</label>
+              <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Project Management Hours</label>
             </div>
             <button
               type="submit"
@@ -444,7 +458,7 @@ export default function ProjectRequirementsPage() {
                       onChange={(event) => setEditingTitle(event.target.value)}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     />
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirement Title</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Requirement Title</label>
                   </div>
                   <div className="relative">
                     <select
@@ -455,7 +469,7 @@ export default function ProjectRequirementsPage() {
                       <option>Functional</option>
                       <option>Non-functional</option>
                     </select>
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Type</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Type</label>
                   </div>
                   <div className="relative">
                     <select
@@ -467,7 +481,7 @@ export default function ProjectRequirementsPage() {
                       <option>Approved</option>
                       <option>In review</option>
                     </select>
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Status</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Status</label>
                   </div>
                   <div className="relative">
                     <select
@@ -488,7 +502,7 @@ export default function ProjectRequirementsPage() {
                         </option>
                       ))}
                     </select>
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Assigned User</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Assigned User</label>
                   </div>
                   <div className="relative">
                     <input
@@ -502,7 +516,7 @@ export default function ProjectRequirementsPage() {
                       }}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     />
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirements Analysis Hours</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Requirements Analysis Hours</label>
                   </div>
                   <div className="relative">
                     <input
@@ -516,7 +530,7 @@ export default function ProjectRequirementsPage() {
                       }}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     />
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Design Hours</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Design Hours</label>
                   </div>
                   <div className="relative">
                     <input
@@ -530,7 +544,7 @@ export default function ProjectRequirementsPage() {
                       }}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     />
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Coding Hours</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Coding Hours</label>
                   </div>
                   <div className="relative">
                     <input
@@ -544,7 +558,7 @@ export default function ProjectRequirementsPage() {
                       }}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     />
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Testing Hours</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Testing Hours</label>
                   </div>
                   <div className="relative">
                     <input
@@ -558,13 +572,14 @@ export default function ProjectRequirementsPage() {
                       }}
                       className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     />
-                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Project Management Hours</label>
+                    <label htmlFor="floating_outlined" className="pointer-events-none absolute top-2 start-1 z-10 -translate-y-4 scale-75 bg-white px-2 text-sm text-slate-500 duration-300 dark:bg-slate-900 dark:text-slate-400">Project Management Hours</label>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => saveEdit(item.id)}
-                      className="rounded-full bg-slate-900 px-3 py-2 text-xs font-semibold text-white dark:bg-slate-100 dark:text-slate-900"
+                      disabled={!hasEditChanges(item)}
+                      className="rounded-full bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:bg-slate-100 dark:text-slate-900 dark:disabled:bg-slate-800 dark:disabled:text-slate-500"
                     >
                       Save
                     </button>
