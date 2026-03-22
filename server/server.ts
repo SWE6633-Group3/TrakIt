@@ -56,6 +56,20 @@ const hydrateProject = <
   };
 };
 
+type ProjectRow = {
+  id: number;
+  name: string;
+  description: string | null;
+  manager_name: string | null;
+  team_members_json?: string | null;
+  owner_user_id: number;
+  created_at: string;
+  current_user_role?: string | null;
+  requirements_count?: number;
+  risks_count?: number;
+  team_count?: number;
+};
+
 app.use(cors());
 app.use(express.json());
 
@@ -205,7 +219,7 @@ app.get('/api/projects-summary', async (req, res) => {
 
   try {
     const db = getDb();
-    const projects = await db.all(
+    const projects = await db.all<ProjectRow>(
       `SELECT
         p.id,
         p.name,
@@ -239,7 +253,7 @@ app.get('/api/projects/:id', async (req, res) => {
 
   try {
     const db = getDb();
-    const project = await db.get(
+    const project = await db.get<ProjectRow>(
       'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
       id
     );
@@ -280,7 +294,7 @@ app.post('/api/projects', async (req, res) => {
       ownerUserId,
       'Lead'
     );
-    const project = await db.get(
+    const project = await db.get<ProjectRow>(
       'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
       projectId
     );
@@ -336,7 +350,7 @@ app.put('/api/projects/:id', async (req, res) => {
         : currentProject.team_members_json ?? '[]',
       id
     );
-    const project = await db.get(
+    const project = await db.get<ProjectRow>(
       'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
       id
     );
