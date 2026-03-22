@@ -57,9 +57,31 @@ export default function ProjectRequirementsPage() {
   const [editProjMgmtHours, setEditProjMgmtHours] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [projectName, setProjectName] = useState<string | null>(null);
   const [currentRole, setCurrentRole] = useState<"Lead" | "Member" | null>(
     null
   );
+
+  const loadProjectName = () => {
+    if (!Number.isFinite(projectId) || projectId <= 0) {
+      setProjectName(null);
+      return;
+    }
+    fetch(`${API_BASE}/api/projects/${projectId}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          return null;
+        }
+        const payload = await response.json().catch(() => ({}));
+        return payload?.project?.name ?? null;
+      })
+      .then((name) => {
+        setProjectName(name);
+      })
+      .catch(() => {
+        setProjectName(null);
+      });
+  };
 
   const loadRequirements = () => {
     if (!Number.isFinite(projectId) || projectId <= 0) {
@@ -111,6 +133,7 @@ export default function ProjectRequirementsPage() {
   };
 
   useEffect(() => {
+    loadProjectName();
     loadRequirements();
   }, [projectId]);
 
@@ -294,7 +317,10 @@ export default function ProjectRequirementsPage() {
       description="Create, update, or remove functional and non-functional requirements for this project."
       breadcrumbs={[
         { label: "Projects", href: "/projects" },
-        { label: `Project ${params?.projectId ?? ""}`, href: `/projects/${params?.projectId ?? ""}` },
+        {
+          label: projectName ?? `Project ${params?.projectId ?? ""}`,
+          href: `/projects/${params?.projectId ?? ""}`,
+        },
         { label: "Requirements", href: `/projects/${params?.projectId ?? ""}/requirements` },
       ]}
     >

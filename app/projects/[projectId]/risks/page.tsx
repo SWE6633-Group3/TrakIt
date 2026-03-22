@@ -33,9 +33,31 @@ export default function ProjectRisksPage() {
   const [editingStatus, setEditingStatus] = useState("Open");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [projectName, setProjectName] = useState<string | null>(null);
   const [currentRole, setCurrentRole] = useState<"Lead" | "Member" | null>(
     null
   );
+
+  const loadProjectName = useCallback(() => {
+    if (!Number.isFinite(projectId) || projectId <= 0) {
+      setProjectName(null);
+      return;
+    }
+    fetch(`${API_BASE}/api/projects/${projectId}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          return null;
+        }
+        const payload = await response.json().catch(() => ({}));
+        return payload?.project?.name ?? null;
+      })
+      .then((name) => {
+        setProjectName(name);
+      })
+      .catch(() => {
+        setProjectName(null);
+      });
+  }, [projectId]);
 
   const loadRisks = useCallback(() => {
     if (!Number.isFinite(projectId) || projectId <= 0) {
@@ -86,8 +108,9 @@ export default function ProjectRisksPage() {
   }, [projectId, projectIdParam]);
 
   useEffect(() => {
+    loadProjectName();
     loadRisks();
-  }, [loadRisks]);
+  }, [loadProjectName, loadRisks]);
 
   const handleCreate = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -212,7 +235,10 @@ export default function ProjectRisksPage() {
       description="Create, update, and monitor project risks."
       breadcrumbs={[
         { label: "Projects", href: "/projects" },
-        { label: `Project ${params?.projectId ?? ""}`, href: `/projects/${params?.projectId ?? ""}` },
+        {
+          label: projectName ?? `Project ${params?.projectId ?? ""}`,
+          href: `/projects/${params?.projectId ?? ""}`,
+        },
         { label: "Risks", href: `/projects/${params?.projectId ?? ""}/risks` },
       ]}
     >

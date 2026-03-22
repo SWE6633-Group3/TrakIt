@@ -1,4 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
+import { migrations } from "./migrations/index.js";
 
 type RunResult = { lastID?: number };
 
@@ -11,6 +12,40 @@ type DbAdapter = {
 };
 
 let db: DbAdapter | null = null;
+
+async function runMigrations(connectedDb: DbAdapter) {
+  await connectedDb.exec(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      id TEXT PRIMARY KEY,
+      applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+
+  const appliedRows = await connectedDb.all<{ id: string }>(
+    "SELECT id FROM schema_migrations ORDER BY id;"
+  );
+  const applied = new Set(appliedRows.map((row) => row.id));
+
+  for (const migration of migrations) {
+    if (applied.has(migration.id)) {
+      continue;
+    }
+
+    console.log(`Applying migration ${migration.id}`);
+    await connectedDb.exec("BEGIN;");
+    try {
+      await migration.up(connectedDb);
+      await connectedDb.run(
+        "INSERT INTO schema_migrations (id) VALUES (?);",
+        migration.id
+      );
+      await connectedDb.exec("COMMIT;");
+    } catch (err) {
+      await connectedDb.exec("ROLLBACK;");
+      throw err;
+    }
+  }
+}
 
 export async function connectToDatabase(filename: string) {
   const database = new DatabaseSync(filename);
@@ -54,93 +89,7 @@ export async function connectToDatabase(filename: string) {
   const connectedDb = db;
 
   await connectedDb.exec("PRAGMA foreign_keys = ON;");
-  await connectedDb.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL DEFAULT '',
-      created_at TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS projects (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      description TEXT,
-      manager_name TEXT,
-      team_members_json TEXT NOT NULL DEFAULT '[]',
-      owner_user_id INTEGER NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS project_users (
-      project_id INTEGER NOT NULL,
-      user_id INTEGER NOT NULL,
-      role TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      PRIMARY KEY (project_id, user_id),
-      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-    );
-
-    CREATE TABLE IF NOT EXISTS requirements (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      project_id INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      type TEXT NOT NULL,
-      status TEXT NOT NULL,
-      assigned_user_id INTEGER,
-      req_analysis_hours INTEGER default 0,
-      design_hours INTEGER default 0,
-      coding_hours INTEGER default 0,
-      testing_hours INTEGER default 0,
-      proj_mgmt_hours INTEGER default 0,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-      FOREIGN KEY (assigned_user_id) REFERENCES users(id) ON DELETE SET NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS risks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      project_id INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      impact TEXT NOT NULL,
-      status TEXT NOT NULL,
-      created_at TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-    );
-
-  `);
-
-  const columns = await connectedDb.all<{ name: string }>(
-    "PRAGMA table_info(users);"
-  );
-  const hasPasswordHash = columns.some((col) => col.name === "password_hash");
-  if (!hasPasswordHash) {
-    await connectedDb.exec(
-      "ALTER TABLE users ADD COLUMN password_hash TEXT NOT NULL DEFAULT '';"
-    );
-  }
-
-  const projectColumns = await connectedDb.all<{ name: string }>(
-    "PRAGMA table_info(projects);"
-  );
-  const hasManagerName = projectColumns.some(
-    (col) => col.name === "manager_name"
-  );
-  if (!hasManagerName) {
-    await connectedDb.exec("ALTER TABLE projects ADD COLUMN manager_name TEXT;");
-  }
-
-  const hasTeamMembersJson = projectColumns.some(
-    (col) => col.name === "team_members_json"
-  );
-  if (!hasTeamMembersJson) {
-    await connectedDb.exec(
-      "ALTER TABLE projects ADD COLUMN team_members_json TEXT NOT NULL DEFAULT '[]';"
-    );
-  }
+  await runMigrations(connectedDb);
 
   console.log("Connected to SQLite:", filename);
 

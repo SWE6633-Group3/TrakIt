@@ -9,8 +9,11 @@
     "start": "next start",
     "lint": "eslint",
     "server": "nodemon --watch server --exec \"node --experimental-sqlite --import tsx server/server.ts\"",
+    "server:prod": "node --experimental-sqlite --import tsx server/server.ts",
+    "migrate": "node --experimental-sqlite --import tsx server/migrate.ts",
     "seed": "node --experimental-sqlite --import tsx server/seed.ts",
-    "start-dev": "concurrently \"npm run server\" \"npm run dev\""
+    "start-dev": "concurrently \"npm run server\" \"npm run dev\"",
+    "start:railway": "concurrently \"npm run server:prod\" \"npm run start\""
   },
   "dependencies": {
     "antd": "^6.3.0",

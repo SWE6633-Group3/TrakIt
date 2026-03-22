@@ -31,9 +31,31 @@ export default function ProjectTeamPage() {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [projectName, setProjectName] = useState<string | null>(null);
   const [currentRole, setCurrentRole] = useState<ProjectUser["role"] | null>(
     null
   );
+
+  const loadProjectName = useCallback(() => {
+    if (!Number.isFinite(projectId) || projectId <= 0) {
+      setProjectName(null);
+      return;
+    }
+    fetch(`${API_BASE}/api/projects/${projectId}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          return null;
+        }
+        const payload = await response.json().catch(() => ({}));
+        return payload?.project?.name ?? null;
+      })
+      .then((name) => {
+        setProjectName(name);
+      })
+      .catch(() => {
+        setProjectName(null);
+      });
+  }, [projectId]);
 
   const loadTeam = useCallback(() => {
     if (!Number.isFinite(projectId) || projectId <= 0) {
@@ -73,8 +95,9 @@ export default function ProjectTeamPage() {
   }, [projectId, projectIdParam]);
 
   useEffect(() => {
+    loadProjectName();
     loadTeam();
-  }, [loadTeam]);
+  }, [loadProjectName, loadTeam]);
 
   const handleCreate = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -206,7 +229,7 @@ export default function ProjectTeamPage() {
       breadcrumbs={[
         { label: "Projects", href: "/projects" },
         {
-          label: `Project ${params?.projectId ?? ""}`,
+          label: projectName ?? `Project ${params?.projectId ?? ""}`,
           href: `/projects/${params?.projectId ?? ""}`,
         },
         { label: "Team", href: `/projects/${params?.projectId ?? ""}/team` },

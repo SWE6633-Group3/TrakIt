@@ -40,6 +40,7 @@ This project includes the following npm scripts. Run them from the project root.
 - `npm start` — Start the production server after building the app.
 - `npm run lint` — Run ESLint.
 - `npm run server` — Start the backend server (http://localhost:3001) with nodemon + tsx.
+- `npm run migrate` — Run SQLite schema migrations.
 - `npm run seed` — Seed the SQLite database with sample data.
 - `npm run start-dev` — Start the app (http://localhost:3000) and the server (http://localhost:3001).
 
@@ -51,6 +52,9 @@ npm run dev
 
 # Start backend server
 npm run server
+
+# Run database migrations
+npm run migrate
 
 # Seed the database
 npm run seed
@@ -87,10 +91,21 @@ The backend runs as a separate Express server on port 3001 and uses Node's built
    ```bash
    npm run server
    ```
+   The server applies pending migrations on startup.
 2. Verify health:
    ```bash
    curl http://localhost:3001/api/health
    ```
+
+## Database migrations
+
+Migrations run automatically when the backend starts. You can also run them manually:
+
+```bash
+npm run migrate
+```
+
+Add new migrations in `server/migrations/index.ts` by appending a new entry with a unique, increasing id (for example `20260322_0003_add_foo`). Use `ensureColumn` for additive changes.
 
 ## Seeding data
 
