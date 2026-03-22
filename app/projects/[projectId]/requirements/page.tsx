@@ -265,6 +265,15 @@ export default function ProjectRequirementsPage() {
       });
   };
 
+  const getAssignedTaskName = (requirementId: number): string => {
+    const requirement = requirements.find(req => req.id === requirementId);
+    if (!requirement || !requirement.assigned_user_id) {
+      return "Unassigned";
+    }
+    const assignedUser = users.find(user => user.id === requirement.assigned_user_id);
+    return assignedUser ? assignedUser.name : "Unassigned";
+  }
+
   return (
     <PageLayout
       title="Project requirements"
@@ -332,7 +341,7 @@ export default function ProjectRequirementsPage() {
             <input
               type="number"
               min={0}
-              step="0.5"
+              step="1"
               value={reqAnalysisHours ?? ""}
               onChange={(e) => {
                 const v = e.currentTarget.value;
@@ -343,7 +352,7 @@ export default function ProjectRequirementsPage() {
             <input
               type="number"
               min={0}
-              step="0.5"
+              step="1"
               value={designHours ?? ""}
                 onChange={(e) => {
                   const v = e.currentTarget.value;
@@ -354,8 +363,8 @@ export default function ProjectRequirementsPage() {
             <input
               type="number"
               min={0}
-              step="0.5"
-              value={codingHours}
+              step="1"
+              value={codingHours ?? ""}
               onChange={(e) => {
                 const v = e.currentTarget.value;
                 setCodingHours(Number(v));
@@ -365,7 +374,7 @@ export default function ProjectRequirementsPage() {
             <input
               type="number"
               min={0}
-              step="0.5"
+              step="1"
               value={testingHours ?? ""}
               onChange={(e) => {
                 const v = e.currentTarget.value;
@@ -376,7 +385,7 @@ export default function ProjectRequirementsPage() {
             <input
               type="number"
               min={0}
-              step="0.5"
+              step="1"
               value={projMgmtHours ?? ""}
               onChange={(e) => {
                 const v = e.currentTarget.value;
@@ -454,7 +463,7 @@ export default function ProjectRequirementsPage() {
                   <input
                     type="number"
                     min={0}
-                    step="0.5"
+                    step="1"
                     value={editReqAnalysisHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
@@ -465,7 +474,7 @@ export default function ProjectRequirementsPage() {
                   <input
                     type="number"
                     min={0}
-                    step="0.5"
+                    step="1"
                     value={editDesignHours ?? ""}
                       onChange={(e) => {
                         const v = e.currentTarget.value;
@@ -476,7 +485,7 @@ export default function ProjectRequirementsPage() {
                   <input
                     type="number"
                     min={0}
-                    step="0.5"
+                    step="1"
                     value={editCodingHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
@@ -487,7 +496,7 @@ export default function ProjectRequirementsPage() {
                   <input
                     type="number"
                     min={0}
-                    step="0.5"
+                    step="1"
                     value={editTestingHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
@@ -498,7 +507,7 @@ export default function ProjectRequirementsPage() {
                   <input
                     type="number"
                     min={0}
-                    step="0.5"
+                    step="1"
                     value={editProjMgmtHours ?? ""}
                     onChange={(e) => {
                       const v = e.currentTarget.value;
@@ -530,7 +539,7 @@ export default function ProjectRequirementsPage() {
                       {item.title}
                     </p>
                     <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                      {item.type} · {item.status}
+                      <b>{item.type}</b> · <b>{item.status}</b> · <b>Assigned to: </b>{getAssignedTaskName(item.id)} · <b>Req Analysis Hours:</b> {item.req_analysis_hours ?? 0} · <b>Design Hours:</b> {item.design_hours ?? 0} · <b>Coding Hours:</b> {item.coding_hours ?? 0} · <b>Testing Hours:</b> {item.testing_hours ?? 0} · <b>PM Hours:</b> {item.proj_mgmt_hours ?? 0} 
                     </p>
                   </div>
                   {currentRole === "Lead" ? (
