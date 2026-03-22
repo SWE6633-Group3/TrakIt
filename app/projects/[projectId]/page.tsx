@@ -12,6 +12,8 @@ type Project = {
   id: number;
   name: string;
   description: string | null;
+  manager_name?: string | null;
+  team_members?: string[];
 };
 
 type Requirement = {
@@ -140,6 +142,26 @@ export default function ProjectDetailsPage() {
                     <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
                       {project?.description || "No description provided yet."}
                     </p>
+                    <div className="mt-4 grid gap-3 text-sm text-slate-600 dark:text-slate-300 md:grid-cols-2">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                          Manager name
+                        </p>
+                        <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
+                          {project?.manager_name || "Not set"}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                          Team members list
+                        </p>
+                        <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
+                          {project?.team_members?.length
+                            ? project.team_members.join(", ")
+                            : "Not set"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">

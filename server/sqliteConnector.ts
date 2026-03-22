@@ -67,6 +67,8 @@ export async function connectToDatabase(filename: string) {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       description TEXT,
+      manager_name TEXT,
+      team_members_json TEXT NOT NULL DEFAULT '[]',
       owner_user_id INTEGER NOT NULL,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -118,6 +120,25 @@ export async function connectToDatabase(filename: string) {
   if (!hasPasswordHash) {
     await connectedDb.exec(
       "ALTER TABLE users ADD COLUMN password_hash TEXT NOT NULL DEFAULT '';"
+    );
+  }
+
+  const projectColumns = await connectedDb.all<{ name: string }>(
+    "PRAGMA table_info(projects);"
+  );
+  const hasManagerName = projectColumns.some(
+    (col) => col.name === "manager_name"
+  );
+  if (!hasManagerName) {
+    await connectedDb.exec("ALTER TABLE projects ADD COLUMN manager_name TEXT;");
+  }
+
+  const hasTeamMembersJson = projectColumns.some(
+    (col) => col.name === "team_members_json"
+  );
+  if (!hasTeamMembersJson) {
+    await connectedDb.exec(
+      "ALTER TABLE projects ADD COLUMN team_members_json TEXT NOT NULL DEFAULT '[]';"
     );
   }
 

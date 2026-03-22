@@ -1,6 +1,6 @@
 ## Prerequisites
 
-- Node.js 18 or later (LTS recommended)
+- Node.js 22.12 or later
 - npm (bundled with Node.js). You can also use yarn or pnpm if you prefer.
 
 Verify installation:
@@ -73,7 +73,7 @@ PORT=3001
 SQLITE_DB=trackit.db
 ```
 
-Create a `.env.local` file in the project root for frontend settings:
+Create a `.env.local` file in the project root for frontend settings if you want to override the default API base:
 
 ```env
 NEXT_PUBLIC_API_BASE=http://localhost:3001
@@ -81,7 +81,7 @@ NEXT_PUBLIC_API_BASE=http://localhost:3001
 
 ## Backend setup
 
-The backend runs as a separate Express server on port 3001 and uses SQLite as the data store.
+The backend runs as a separate Express server on port 3001 and uses Node's built-in experimental SQLite module as the data store. The npm scripts in this repo already start Node with `--experimental-sqlite`.
 
 1. Start the backend:
    ```bash
@@ -104,26 +104,6 @@ The seed script creates:
 - Users (including the class roster + 5 mock users)
 - 4 projects with detailed descriptions
 - Requirements, risks, and project users (lead + members)
-
-## Troubleshooting
-
-If you run into problems:
-
-- Remove existing node modules and lockfile then reinstall:
-
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-- Clear Next.js cache by removing `.next` then rebuild:
-
-```bash
-rm -rf .next
-npm run build
-```
-
-- Ensure Node.js version meets the prerequisite.
 
 ## Contributing
 

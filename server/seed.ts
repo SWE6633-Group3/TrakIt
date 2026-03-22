@@ -12,6 +12,8 @@ type UserSeed = {
 type ProjectSeed = {
   name: string;
   description: string;
+  managerName: string;
+  teamMembers: string[];
 };
 
 const users: UserSeed[] = [
@@ -33,21 +35,29 @@ const projects: ProjectSeed[] = [
     name: "TrakIt Launch Plan",
     description:
       "Coordinating the initial TrakIt release, including stakeholder alignment, delivery milestones, and readiness tracking for requirements, risks, and team operations.",
+    managerName: "Louis Muhammad",
+    teamMembers: ["Aaliyah McElrath", "Anthony Nguyen", "Yukang Shen"],
   },
   {
     name: "Client Portal Refresh",
     description:
       "Redesigning the client portal with improved navigation, accessibility updates, and new reporting capabilities while tracking delivery risks and requirements.",
+    managerName: "Aaliyah McElrath",
+    teamMembers: ["Joseph Pentecost", "Matthew Maravilla", "Priya Desai"],
   },
   {
     name: "Mobile Intake Workflow",
     description:
       "Building a mobile-first intake experience to capture requests in the field, sync data, and surface high-priority risks in real time.",
+    managerName: "Yukang Shen",
+    teamMembers: ["Anthony Nguyen", "Miles Carter", "Elena Park"],
   },
   {
     name: "Operations Analytics Hub",
     description:
       "Creating a centralized analytics hub to monitor operational KPIs, automate weekly reporting, and align teams around decision-ready insights.",
+    managerName: "Samantha Rhodes",
+    teamMembers: ["Caleb Ortiz", "Louis Muhammad", "Matthew Maravilla"],
   },
 ];
 
@@ -100,9 +110,11 @@ async function seed() {
     const projectId =
       (
         await db.run(
-          "INSERT INTO projects (name, description, owner_user_id) VALUES (?, ?, ?);",
+          "INSERT INTO projects (name, description, manager_name, team_members_json, owner_user_id) VALUES (?, ?, ?, ?, ?);",
           projectSeed.name,
           projectSeed.description,
+          projectSeed.managerName,
+          JSON.stringify(projectSeed.teamMembers),
           owner.id
         )
       ).lastID ?? 0;
