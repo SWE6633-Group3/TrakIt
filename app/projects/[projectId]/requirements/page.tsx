@@ -294,15 +294,18 @@ export default function ProjectRequirementsPage() {
         {hasAccess === false ? null : currentRole === "Lead" ? (
           <form
             onSubmit={handleCreate}
-            className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-[2fr_1fr_1fr_auto]"
+            className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-2 xl:grid-cols-4"
           >
-            <input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Requirement title"
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              required
-            />
+            <div className="relative xl:col-span-2">
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Requirement title"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                required
+              />
+              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirement Title</label>
+            </div>
             <select
               value={type}
               onChange={(event) => setType(event.target.value)}
@@ -338,61 +341,76 @@ export default function ProjectRequirementsPage() {
                 </option>
               ))}
             </select>
-            <input
-              type="number"
-              min={0}
-              step="1"
-              value={reqAnalysisHours ?? ""}
-              onChange={(e) => {
-                const v = e.currentTarget.value;
-                setReqAnalysisHours(Number(v));
-              }}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-            <input
-              type="number"
-              min={0}
-              step="1"
-              value={designHours ?? ""}
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={reqAnalysisHours ?? ""}
                 onChange={(e) => {
                   const v = e.currentTarget.value;
-                  setDesignHours(Number(v));
+                  setReqAnalysisHours(Number(v));
                 }}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-            <input
-              type="number"
-              min={0}
-              step="1"
-              value={codingHours ?? ""}
-              onChange={(e) => {
-                const v = e.currentTarget.value;
-                setCodingHours(Number(v));
-              }}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-            <input
-              type="number"
-              min={0}
-              step="1"
-              value={testingHours ?? ""}
-              onChange={(e) => {
-                const v = e.currentTarget.value;
-                setTestingHours(Number(v));
-              }}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-            <input
-              type="number"
-              min={0}
-              step="1"
-              value={projMgmtHours ?? ""}
-              onChange={(e) => {
-                const v = e.currentTarget.value;
-                setProjMgmtHours(Number(v));
-              }}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirements Analysis Hours</label>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={designHours ?? ""}
+                  onChange={(e) => {
+                    const v = e.currentTarget.value;
+                    setDesignHours(Number(v));
+                  }}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Design Hours</label>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={codingHours ?? ""}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setCodingHours(Number(v));
+                }}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Coding Hours</label>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={testingHours ?? ""}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setTestingHours(Number(v));
+                }}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Testing Hours</label>
+            </div>
+            <div className="relative">
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={projMgmtHours ?? ""}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  setProjMgmtHours(Number(v));
+                }}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+              <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Project Management Hours</label>
+            </div>
             <button
               type="submit"
               className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
@@ -419,102 +437,129 @@ export default function ProjectRequirementsPage() {
               className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
             >
               {editingId === item.id ? (
-                <div className="grid gap-3 md:grid-cols-[2fr_1fr_1fr_auto]">
-                  <input
-                    value={editingTitle}
-                    onChange={(event) => setEditingTitle(event.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                  <select
-                    value={editingType}
-                    onChange={(event) => setEditingType(event.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  >
-                    <option>Functional</option>
-                    <option>Non-functional</option>
-                  </select>
-                  <select
-                    value={editingStatus}
-                    onChange={(event) => setEditingStatus(event.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  >
-                    <option>Draft</option>
-                    <option>Approved</option>
-                    <option>In review</option>
-                  </select>
-                  <select
-                    value={editAssignedUserId ?? ""}
-                    onChange={(event) =>
-                      setEditAssignedUserId(
-                        event.target.value
-                          ? Number.parseInt(event.target.value, 10)
-                          : null
-                      )
-                    }
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  >
-                    <option value="">Unassigned</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    min={0}
-                    step="1"
-                    value={editReqAnalysisHours ?? ""}
-                    onChange={(e) => {
-                      const v = e.currentTarget.value;
-                      setEditReqAnalysisHours(Number(v));
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                  <input
-                    type="number"
-                    min={0}
-                    step="1"
-                    value={editDesignHours ?? ""}
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="relative xl:col-span-2">
+                    <input
+                      value={editingTitle}
+                      onChange={(event) => setEditingTitle(event.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirement Title</label>
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={editingType}
+                      onChange={(event) => setEditingType(event.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    >
+                      <option>Functional</option>
+                      <option>Non-functional</option>
+                    </select>
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Type</label>
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={editingStatus}
+                      onChange={(event) => setEditingStatus(event.target.value)}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    >
+                      <option>Draft</option>
+                      <option>Approved</option>
+                      <option>In review</option>
+                    </select>
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Status</label>
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={editAssignedUserId ?? ""}
+                      onChange={(event) =>
+                        setEditAssignedUserId(
+                          event.target.value
+                            ? Number.parseInt(event.target.value, 10)
+                            : null
+                        )
+                      }
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    >
+                      <option value="">Unassigned</option>
+                      {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.name}
+                        </option>
+                      ))}
+                    </select>
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Assigned User</label>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={editReqAnalysisHours ?? ""}
+                      onChange={(e) => {
+                        const v = e.currentTarget.value;
+                        setEditReqAnalysisHours(Number(v));
+                      }}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Requirements Analysis Hours</label>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={editDesignHours ?? ""}
                       onChange={(e) => {
                         const v = e.currentTarget.value;
                         setEditDesignHours(Number(v));
                       }}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                  <input
-                    type="number"
-                    min={0}
-                    step="1"
-                    value={editCodingHours ?? ""}
-                    onChange={(e) => {
-                      const v = e.currentTarget.value;
-                      setEditCodingHours(Number(v));
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                  <input
-                    type="number"
-                    min={0}
-                    step="1"
-                    value={editTestingHours ?? ""}
-                    onChange={(e) => {
-                      const v = e.currentTarget.value;
-                      setEditTestingHours(Number(v));
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
-                  <input
-                    type="number"
-                    min={0}
-                    step="1"
-                    value={editProjMgmtHours ?? ""}
-                    onChange={(e) => {
-                      const v = e.currentTarget.value;
-                      setEditProjMgmtHours(Number(v));
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                  />
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Design Hours</label>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={editCodingHours ?? ""}
+                      onChange={(e) => {
+                        const v = e.currentTarget.value;
+                        setEditCodingHours(Number(v));
+                      }}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Coding Hours</label>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={editTestingHours ?? ""}
+                      onChange={(e) => {
+                        const v = e.currentTarget.value;
+                        setEditTestingHours(Number(v));
+                      }}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Testing Hours</label>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={editProjMgmtHours ?? ""}
+                      onChange={(e) => {
+                        const v = e.currentTarget.value;
+                        setEditProjMgmtHours(Number(v));
+                      }}
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
+                    <label htmlFor="floating_outlined" className="absolute text-sm text-body duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-neutral-primary px-2 peer-focus:px-2 peer-focus:text-fg-brand peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1">Project Management Hours</label>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
@@ -539,7 +584,7 @@ export default function ProjectRequirementsPage() {
                       {item.title}
                     </p>
                     <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                      <b>{item.type}</b> · <b>{item.status}</b> · <b>Assigned to: </b>{getAssignedTaskName(item.id)} · <b>Req Analysis Hours:</b> {item.req_analysis_hours ?? 0} · <b>Design Hours:</b> {item.design_hours ?? 0} · <b>Coding Hours:</b> {item.coding_hours ?? 0} · <b>Testing Hours:</b> {item.testing_hours ?? 0} · <b>PM Hours:</b> {item.proj_mgmt_hours ?? 0} 
+                      <b >{item.type}</b> · <b>{item.status}</b> · <b>Assigned to: </b>{getAssignedTaskName(item.id)} · <b>Req Analysis Hours:</b> {item.req_analysis_hours ?? 0} · <b>Design Hours:</b> {item.design_hours ?? 0} · <b>Coding Hours:</b> {item.coding_hours ?? 0} · <b>Testing Hours:</b> {item.testing_hours ?? 0} · <b>PM Hours:</b> {item.proj_mgmt_hours ?? 0} 
                     </p>
                   </div>
                   {currentRole === "Lead" ? (
