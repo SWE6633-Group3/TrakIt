@@ -98,7 +98,6 @@ export default function ProjectTeamPage() {
     loadProjectName();
     loadTeam();
   }, [loadProjectName, loadTeam]);
-  
 
   const handleCreate = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
