@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const STORAGE_KEY = "trakItLoggedIn";
 const USER_NAME_KEY = "trakItUserName";
@@ -16,88 +16,109 @@ export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+  // 1. Refinement: Prevent logged-in users from seeing the login page
+  useEffect(() => {
+    if (localStorage.getItem(STORAGE_KEY) === "true") {
+      router.push("/projects");
+    }
+  }, [router]);
+
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage(null);
     setIsSubmitting(true);
+
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const name = email.split("@")[0] || "User";
-    fetch(`${API_BASE}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          const payload = await response.json().catch(() => ({}));
-          const message = payload?.error ?? "Unable to sign in.";
-          throw new Error(message);
-        }
-        return response.json();
-      })
-      .then((payload) => {
-        const userId = String(payload?.user?.id ?? "");
-        window.localStorage.setItem(STORAGE_KEY, "true");
-        window.localStorage.setItem(USER_NAME_KEY, payload?.user?.name ?? name);
-        window.localStorage.setItem(USER_EMAIL_KEY, email);
-        if (userId) {
-          window.localStorage.setItem(USER_ID_KEY, userId);
-        }
-        window.dispatchEvent(new Event(AUTH_EVENT));
-        router.push("/projects");
-      })
-      .catch((error) => {
-        setErrorMessage(error.message);
-      })
-      .finally(() => {
-        setIsSubmitting(false);
+
+    try {
+      // 2. Refinement: Using async/await for better readability
+      const response = await fetch(`${API_BASE}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Unable to sign in. Please check your credentials.");
+      }
+
+      // 3. Refinement: Persistent storage handling
+      const userId = String(payload?.user?.id ?? "");
+      window.localStorage.setItem(STORAGE_KEY, "true");
+      window.localStorage.setItem(USER_NAME_KEY, payload?.user?.name ?? name);
+      window.localStorage.setItem(USER_EMAIL_KEY, email);
+      
+      if (userId) {
+        window.localStorage.setItem(USER_ID_KEY, userId);
+      }
+
+      window.dispatchEvent(new Event(AUTH_EVENT));
+      router.push("/projects");
+      router.refresh(); // Forces Next.js to update the layout
+      
+    } catch (error: any) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleLogin} className="space-y-5">
-      <label className="block">
-        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+      <div className="space-y-2">
+        <label htmlFor="email-field" className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           Email
-        </span>
+        </label>
         <input
+          id="email-field"
           name="email"
           type="email"
+          autoComplete="email"
           placeholder="name@company.com"
-          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          onChange={() => setErrorMessage(null)}
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           required
         />
-      </label>
-      <label className="block">
-        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="password-field" className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           Password
-        </span>
+        </label>
         <input
+          id="password-field"
           name="password"
           type="password"
+          autoComplete="current-password"
           placeholder="Enter your password"
-          className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          onChange={() => setErrorMessage(null)}
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           required
         />
-      </label>
-      {errorMessage ? (
-        <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+      </div>
+
+      {errorMessage && (
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 animate-in fade-in slide-in-from-top-1">
           {errorMessage}
-        </p>
-      ) : null}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="submit"
-          className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+          className="rounded-full bg-slate-900 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Signing in..." : "Log in"}
         </button>
         <Link
           href="/signup"
-          className="text-sm font-medium text-slate-600 dark:text-slate-300"
+          className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:text-white"
         >
           New here? Create an account
         </Link>
