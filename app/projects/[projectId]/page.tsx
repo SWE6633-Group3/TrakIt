@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import PageLayout from "../../_components/PageLayout";
+import { getRiskColor } from "./riskColors";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001";
 
@@ -274,12 +275,12 @@ export default function ProjectDetailsPage() {
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-semibold">{item.title}</span>
-                        <span className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+                        <span className={`rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] dark:border-slate-700 dark:bg-slate-900 ${getRiskColor(item.impact)}`}>
                           {item.impact} impact
                         </span>
                       </div>
                       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        Status: {item.status}
+                        Status: <span  className={getRiskColor(item.status)}>{item.status}</span>
                       </p>
                     </div>
                   ))}

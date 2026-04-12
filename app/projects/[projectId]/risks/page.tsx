@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import PageLayout from "../../../_components/PageLayout";
+import { getRiskColor } from "../riskColors";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001";
 
@@ -313,20 +314,20 @@ export default function ProjectRisksPage() {
                   <select
                     value={editingImpact}
                     onChange={(event) => setEditingImpact(event.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    className={`rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900 ${getRiskColor(editingImpact)}`}
                   >
-                    <option>Low</option>
-                    <option>Medium</option>
-                    <option>High</option>
+                    <option className={getRiskColor('Low')} value="Low">Low</option>
+                    <option className={getRiskColor('Medium')} value="Medium">Medium</option>
+                    <option className={getRiskColor('High')} value="High">High</option>
                   </select>
                   <select
                     value={editingStatus}
                     onChange={(event) => setEditingStatus(event.target.value)}
-                    className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    className={`rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900 ${getRiskColor(editingStatus)}`}
                   >
-                    <option>Open</option>
-                    <option>Monitoring</option>
-                    <option>Closed</option>
+                    <option className={getRiskColor('Open')} value="Open">Open</option>
+                    <option className={getRiskColor('Monitoring')} value="Monitoring">Monitoring</option>
+                    <option className={getRiskColor('Closed')} value="Closed">Closed</option>
                   </select>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -352,7 +353,15 @@ export default function ProjectRisksPage() {
                       {item.title}
                     </p>
                     <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                      {item.impact} impact · {item.status}
+                      <span className={`font-medium ${getRiskColor(item.impact)}`}>
+                        {item.impact} impact
+                      </span>
+                        
+                      {" · "}
+                      
+                      <span className={`font-medium ${getRiskColor(item.status)}`}>
+                        {item.status}
+                      </span>
                     </p>
                   </div>
                   {currentRole === "Lead" ? (
