@@ -11,6 +11,8 @@ type Project = {
   id: number;
   name: string;
   description: string | null;
+  manager_name?: string | null;
+  team_members?: string[];
   owner_user_id: number;
   requirements_count?: number;
   risks_count?: number;
@@ -22,6 +24,8 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [managerName, setManagerName] = useState("");
+  const [teamMembersText, setTeamMembersText] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
   const [editingDescription, setEditingDescription] = useState("");
@@ -99,6 +103,11 @@ export default function ProjectsPage() {
       body: JSON.stringify({
         name,
         description,
+        managerName,
+        teamMembers: teamMembersText
+          .split(/\n|,/)
+          .map((member) => member.trim())
+          .filter(Boolean),
         ownerUserId: Number(ownerUserId),
       }),
     })
@@ -113,6 +122,8 @@ export default function ProjectsPage() {
       .then(() => {
         setName("");
         setDescription("");
+        setManagerName("");
+        setTeamMembersText("");
         loadProjects(ownerUserId);
       })
       .catch((error: Error) => {
@@ -217,35 +228,53 @@ export default function ProjectsPage() {
           Create a project workspace
         </h1>
         <p className="mt-3 max-w-2xl text-base text-slate-600 dark:text-slate-300">
-          Start a new project by naming it and capturing a short description.
-          You can add requirements, risks, and team members once it is created.
+          Start a new project by capturing the project profile information in
+          one place, including description, manager name, and team member list.
         </p>
         <form
           onSubmit={handleCreateProject}
-          className="mt-6 grid gap-4 md:grid-cols-[2fr_3fr_auto]"
+          className="mt-6 grid gap-4 lg:grid-cols-2"
         >
-          <input
-            type="text"
-            placeholder="Project name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Short description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-          <button
-            type="submit"
-            className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Creating..." : "Create project"}
-          </button>
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950">
+            <input
+              type="text"
+              placeholder="Project name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              required
+            />
+            <textarea
+              placeholder="Project description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              rows={5}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+          </div>
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-950">
+            <input
+              type="text"
+              placeholder="Manager name"
+              value={managerName}
+              onChange={(event) => setManagerName(event.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <textarea
+              placeholder="Team members list, separated by commas or new lines"
+              value={teamMembersText}
+              onChange={(event) => setTeamMembersText(event.target.value)}
+              rows={5}
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            <button
+              type="submit"
+              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create project"}
+            </button>
+          </div>
         </form>
         {errorMessage ? (
           <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -299,9 +328,23 @@ export default function ProjectsPage() {
                 </span>
               </div>
               {editingId === project.id ? null : (
-                <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-                  {project.description || "No description provided yet."}
-                </p>
+                <div className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                  <p>{project.description || "No description provided yet."}</p>
+                  <p>
+                    Manager:{" "}
+                    <span className="font-medium text-slate-700 dark:text-slate-200">
+                      {project.manager_name || "Not set"}
+                    </span>
+                  </p>
+                  <p>
+                    Team members:{" "}
+                    <span className="font-medium text-slate-700 dark:text-slate-200">
+                      {project.team_members?.length
+                        ? project.team_members.join(", ")
+                        : "Not set"}
+                    </span>
+                  </p>
+                </div>
               )}
               <div className="mt-5 grid gap-2 text-sm font-medium text-slate-700 dark:text-slate-200 sm:grid-cols-3">
                 <Link

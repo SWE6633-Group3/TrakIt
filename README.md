@@ -8,30 +8,8 @@ See `README.app.md` for details on how to set up and run the app.
 
 ### Prerequisites
 
-- Node.js 18+ (LTS recommended)
+- Node.js 22.12+ (the backend uses `node:sqlite`)
 - npm
-- MongoDB running locally (default: `mongodb://localhost:27017`)
-
-### MongoDB with Docker (Recommended for local setup)
-
-Start MongoDB container:
-
-```bash
-docker run -d --name trakit-mongo -p 27017:27017 mongo:7
-```
-
-Useful follow-up commands:
-
-```bash
-# start existing container
-docker start trakit-mongo
-
-# stop container
-docker stop trakit-mongo
-
-# view logs
-docker logs -f trakit-mongo
-```
 
 ### 1. Install dependencies
 
@@ -53,6 +31,19 @@ Copy `.env.example` to `.env` and adjust values if needed:
 cp .env.example .env
 ```
 
+Default backend settings:
+
+```env
+PORT=3001
+SQLITE_DB=trackit.db
+```
+
+Optional frontend override in `.env.local`:
+
+```env
+NEXT_PUBLIC_API_BASE=http://localhost:3001
+```
+
 ### 3. Start the project
 
 ```bash
@@ -65,7 +56,7 @@ npm run start-dev
 
 ### Common startup checks
 
-- If backend exits with `ECONNREFUSED 127.0.0.1:27017`, start MongoDB first.
+- If you see `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite`, your Node process is missing the `--experimental-sqlite` flag or is using an older Node version. The provided npm scripts already add the required flag.
 - If `concurrently: command not found`, re-run `npm install`.
 - If ports are occupied, stop the conflicting process or change ports in `.env`.
 

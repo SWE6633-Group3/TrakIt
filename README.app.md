@@ -1,6 +1,6 @@
 ## Prerequisites
 
-- Node.js 18 or later (LTS recommended)
+- Node.js 22.12 or later
 - npm (bundled with Node.js). You can also use yarn or pnpm if you prefer.
 
 Verify installation:
@@ -40,6 +40,7 @@ This project includes the following npm scripts. Run them from the project root.
 - `npm start` — Start the production server after building the app.
 - `npm run lint` — Run ESLint.
 - `npm run server` — Start the backend server (http://localhost:3001) with nodemon + tsx.
+- `npm run migrate` — Run SQLite schema migrations.
 - `npm run seed` — Seed the SQLite database with sample data.
 - `npm run start-dev` — Start the app (http://localhost:3000) and the server (http://localhost:3001).
 
@@ -51,6 +52,9 @@ npm run dev
 
 # Start backend server
 npm run server
+
+# Run database migrations
+npm run migrate
 
 # Seed the database
 npm run seed
@@ -73,7 +77,7 @@ PORT=3001
 SQLITE_DB=trackit.db
 ```
 
-Create a `.env.local` file in the project root for frontend settings:
+Create a `.env.local` file in the project root for frontend settings if you want to override the default API base:
 
 ```env
 NEXT_PUBLIC_API_BASE=http://localhost:3001
@@ -81,16 +85,27 @@ NEXT_PUBLIC_API_BASE=http://localhost:3001
 
 ## Backend setup
 
-The backend runs as a separate Express server on port 3001 and uses SQLite as the data store.
+The backend runs as a separate Express server on port 3001 and uses Node's built-in experimental SQLite module as the data store. The npm scripts in this repo already start Node with `--experimental-sqlite`.
 
 1. Start the backend:
    ```bash
    npm run server
    ```
+   The server applies pending migrations on startup.
 2. Verify health:
    ```bash
    curl http://localhost:3001/api/health
    ```
+
+## Database migrations
+
+Migrations run automatically when the backend starts. You can also run them manually:
+
+```bash
+npm run migrate
+```
+
+Add new migrations in `server/migrations/index.ts` by appending a new entry with a unique, increasing id (for example `20260322_0003_add_foo`). Use `ensureColumn` for additive changes.
 
 ## Seeding data
 
@@ -104,26 +119,6 @@ The seed script creates:
 - Users (including the class roster + 5 mock users)
 - 4 projects with detailed descriptions
 - Requirements, risks, and project users (lead + members)
-
-## Troubleshooting
-
-If you run into problems:
-
-- Remove existing node modules and lockfile then reinstall:
-
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-- Clear Next.js cache by removing `.next` then rebuild:
-
-```bash
-rm -rf .next
-npm run build
-```
-
-- Ensure Node.js version meets the prerequisite.
 
 ## Contributing
 
