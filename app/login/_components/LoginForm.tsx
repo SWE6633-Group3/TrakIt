@@ -16,7 +16,7 @@ export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 1. Refinement: Prevent logged-in users from seeing the login page
+  // Auto-redirect if already logged in
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY) === "true") {
       router.push("/projects");
@@ -34,7 +34,6 @@ export default function LoginForm() {
     const name = email.split("@")[0] || "User";
 
     try {
-      // 2. Refinement: Using async/await for better readability
       const response = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -47,7 +46,6 @@ export default function LoginForm() {
         throw new Error(payload?.error ?? "Unable to sign in. Please check your credentials.");
       }
 
-      // 3. Refinement: Persistent storage handling
       const userId = String(payload?.user?.id ?? "");
       window.localStorage.setItem(STORAGE_KEY, "true");
       window.localStorage.setItem(USER_NAME_KEY, payload?.user?.name ?? name);
@@ -59,10 +57,15 @@ export default function LoginForm() {
 
       window.dispatchEvent(new Event(AUTH_EVENT));
       router.push("/projects");
-      router.refresh(); // Forces Next.js to update the layout
+      router.refresh(); 
       
-    } catch (error: any) {
-      setErrorMessage(error.message);
+    } catch (error: unknown) {
+      // FIX: Check instance to avoid 'any' linting error
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected network error occurred.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -103,7 +106,7 @@ export default function LoginForm() {
       </div>
 
       {errorMessage && (
-        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 animate-in fade-in slide-in-from-top-1">
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {errorMessage}
         </div>
       )}
