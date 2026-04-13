@@ -35,6 +35,7 @@ export default function ForgotPasswordPage() {
         setMessage({ type: "error", text: data.error || "Email not found." });
       }
     } catch (err) {
+      console.error('Error verifying email:', err);
       setMessage({ type: "error", text: "Cannot connect to server. Check backend status." });
     } finally {
       setLoading(false);
@@ -73,6 +74,7 @@ export default function ForgotPasswordPage() {
         setMessage({ type: "error", text: data.error || "Failed to update password." });
       }
     } catch (err) {
+      console.error('Error resetting password:', err);
       setMessage({ type: "error", text: "Connection error during update." });
     } finally {
       setLoading(false);
