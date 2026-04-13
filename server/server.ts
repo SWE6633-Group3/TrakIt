@@ -128,6 +128,56 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+app.post('/api/verify-email', async (req, res) => {
+    const { email } = req.body;
+    console.log('Verifying email:', email);
+    
+    try {
+        const db = getDb();
+        const user = await db.get('SELECT id FROM users WHERE email = ?', email?.trim().toLowerCase());
+        
+        console.log('User found:', !!user);
+        
+        if (!user) {
+            return res.status(200).json({ exists: false, error: "Account not found" });
+        }
+        return res.status(200).json({ exists: true });
+    } catch (err) {
+        console.error('Error in verify-email:', err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+app.post('/api/forgot-password', async (req, res) => {
+  const { email, newPassword } = req.body ?? {};
+
+  if (!email || !newPassword) {
+    return res.status(400).json({ error: 'Email and new password are required' });
+  }
+
+  try {
+    const db = getDb();
+    const user = await db.get('SELECT id FROM users WHERE email = ?', email.toLowerCase());
+
+    if (!user) {
+      return res.status(200).json({ success: false, error: 'User not found' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await db.run(
+      'UPDATE users SET password_hash = ? WHERE email = ?',
+      passwordHash, 
+      email.toLowerCase()
+    );
+
+    return res.json({ success: true, message: 'Password updated successfully!' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'DB error while resetting password' });
+  }
+});
+
 app.get('/api/projects', async (req, res) => {
   const ownerUserId = Number(req.query.ownerUserId ?? 0);
   if (!ownerUserId) {
@@ -582,8 +632,16 @@ app.delete('/api/risks/:id', async (req, res) => {
 
 connectToDatabase(SQLITE_DB)
   .then(() => {
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
+    });
+
+    // Keep the server reference so it doesn't get garbage collected
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM signal received: closing HTTP server');
+      server.close(() => {
+        console.log('HTTP server closed');
+      });
     });
   })
   .catch((err) => {
