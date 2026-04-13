@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
+// Using the same base as your LoginForm
 const API_BASE = "http://localhost:3001";
 
 export default function ForgotPasswordPage() {
@@ -18,12 +19,15 @@ export default function ForgotPasswordPage() {
     setMessage(null);
 
     try {
+      // Ensure the '/api' prefix is included to match server.ts
       const res = await fetch(`${API_BASE}/api/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim().toLowerCase() }),
       });
+      
       const data = await res.json();
+      
       if (res.ok) {
         setStep(2);
         setMessage(null);
@@ -55,8 +59,12 @@ export default function ForgotPasswordPage() {
       const res = await fetch(`${API_BASE}/api/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), newPassword: passwords.new }),
+        body: JSON.stringify({ 
+          email: email.trim().toLowerCase(), 
+          newPassword: passwords.new 
+        }),
       });
+      
       const data = await res.json();
       if (res.ok) {
         setStep(3);
@@ -73,7 +81,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-      {/* Main Form Section */}
       <section className="rounded-3xl border border-slate-200 bg-white px-8 py-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
           Account Recovery
@@ -182,7 +189,6 @@ export default function ForgotPasswordPage() {
         </div>
       </section>
 
-      {/* Sidebar Info Section */}
       <aside className="rounded-3xl border border-slate-200 bg-slate-50 px-8 py-8 dark:border-slate-800 dark:bg-slate-950">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Project tracking starts here
@@ -191,10 +197,6 @@ export default function ForgotPasswordPage() {
           TrakIt keeps requirements, risk registers, and team ownership aligned 
           in one consistent workspace. Protecting your account ensures your project
           data remains secure.
-        </p>
-        <p className="mt-5 text-sm leading-6 text-slate-600 dark:text-slate-300">
-          Once your identity is verified, you can instantly regain access to your 
-          active sprints and project backlogs.
         </p>
       </aside>
     </div>
