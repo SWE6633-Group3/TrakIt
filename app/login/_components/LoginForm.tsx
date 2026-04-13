@@ -16,7 +16,6 @@ export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Auto-redirect if already logged in
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY) === "true") {
       router.push("/projects");
@@ -60,7 +59,6 @@ export default function LoginForm() {
       router.refresh(); 
       
     } catch (error: unknown) {
-      // FIX: Check instance to avoid 'any' linting error
       if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
@@ -73,6 +71,7 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleLogin} className="space-y-5">
+      {/* Email Field */}
       <div className="space-y-2">
         <label htmlFor="email-field" className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           Email
@@ -89,6 +88,7 @@ export default function LoginForm() {
         />
       </div>
 
+      {/* Password Field */}
       <div className="space-y-2">
         <label htmlFor="password-field" className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           Password
@@ -105,12 +105,14 @@ export default function LoginForm() {
         />
       </div>
 
+      {/* Error Message */}
       {errorMessage && (
         <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {errorMessage}
         </div>
       )}
 
+      {/* Bottom Action Area */}
       <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="submit"
@@ -119,12 +121,22 @@ export default function LoginForm() {
         >
           {isSubmitting ? "Signing in..." : "Log in"}
         </button>
-        <Link
-          href="/signup"
-          className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:text-white"
-        >
-          New here? Create an account
-        </Link>
+
+        {/* Navigation Links Stacked Right - Matched Styles */}
+        <div className="flex flex-col items-end gap-1">
+          <Link
+            href="/forgot-password"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:text-white"
+          >
+            Forgot password?
+          </Link>
+          <Link
+            href="/signup"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:text-white"
+          >
+            Don't have an account? Sign Up
+          </Link>
+        </div>
       </div>
     </form>
   );
