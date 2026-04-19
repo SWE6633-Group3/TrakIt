@@ -516,6 +516,14 @@ app.post('/api/projects/:projectId/users', async (req, res) => {
 
   try {
     const db = getDb();
+    if (role === 'Lead') {
+      await db.run(
+        'UPDATE project_users SET role = ? WHERE project_id = ?;',
+        'Member',
+        projectId
+      );
+    }
+
     await db.run(
       'INSERT INTO project_users (project_id, user_id, role) VALUES (?, ?, ?);',
       projectId,
@@ -584,6 +592,30 @@ app.delete('/api/projects/:projectId/users/:userId', async (req, res) => {
 
   try {
     const db = getDb();
+    const member = await db.get<{ role: string }>(
+      'SELECT role FROM project_users WHERE project_id = ? AND user_id = ?;',
+      projectId,
+      userId
+    );
+
+    if (!member) {
+      return res.status(404).json({ error: 'project user not found' });
+    }
+
+    if (member.role === 'Lead') {
+      const leadCount = await db.get<{ count: number }>(
+        'SELECT COUNT(*) as count FROM project_users WHERE project_id = ? AND role = ?;',
+        projectId,
+        'Lead'
+      );
+
+      if ((leadCount?.count ?? 0) <= 1) {
+        return res.status(400).json({
+          error: 'Assign another team lead before removing the current lead.',
+        });
+      }
+    }
+
     await db.run(
       'DELETE FROM project_users WHERE project_id = ? AND user_id = ?;',
       projectId,

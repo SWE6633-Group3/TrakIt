@@ -250,12 +250,22 @@ export default function ProjectTeamPage() {
   };
 
   const deleteItem = (itemId: number) => {
+    const item = team.find((member) => member.id === itemId);
     if (hasAccess === false) {
       setErrorMessage("You are not on this project team.");
       return;
     }
     if (currentRole !== "Lead") {
       setErrorMessage("Only the team lead can remove users.");
+      return;
+    }
+    if (
+      item?.role === "Lead" &&
+      team.filter((member) => member.role === "Lead").length <= 1
+    ) {
+      setErrorMessage(
+        "Assign another team lead before removing the current lead."
+      );
       return;
     }
     if (!window.confirm("Remove this user from the project?")) {
