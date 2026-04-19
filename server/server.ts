@@ -153,8 +153,30 @@ app.post('/api/verify-email', async (req, res) => {
     }
 });
 
+
+app.get('/api/users/search', async (req, res) => {
+  const q = String(req.query.q ?? '').trim().toLowerCase();
+  if (!q) {
+    return res.json({ users: [] });
+  }
+
+  try {
+    const db = getDb();
+    const users = await db.all(
+      'SELECT id, name, email FROM users WHERE LOWER(email) LIKE ? LIMIT 10;',
+      `%${q}%`
+    );
+
+    return res.json({ users });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'DB error' });
+  }
+});
+
 app.post('/api/password-reset/request', async (req, res) => {
   const email = normalizeEmail(req.body?.email);
+
 
   if (!email) {
     return res.status(400).json({ error: 'email is required' });
