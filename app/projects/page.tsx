@@ -14,8 +14,6 @@ type Project = {
   id: number;
   name: string;
   description: string | null;
-  manager_name?: string | null;
-  team_members?: string[];
   owner_user_id: number;
   requirements_count?: number;
   risks_count?: number;

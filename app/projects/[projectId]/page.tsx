@@ -12,8 +12,6 @@ type Project = {
   id: number;
   name: string;
   description: string | null;
-  manager_name?: string | null;
-  team_members?: string[];
 };
 
 type Requirement = {
@@ -77,6 +75,7 @@ export default function ProjectDetailsPage() {
   const openRisks = risks.filter(
     (item) => !item.status.toLowerCase().includes("closed")
   ).length;
+  const projectLead = team.find((member) => member.role === "Lead");
 
   useEffect(() => {
     if (!Number.isFinite(projectId) || projectId <= 0) {
@@ -227,20 +226,24 @@ export default function ProjectDetailsPage() {
                 <div className="mt-5 grid gap-3 md:grid-cols-2">
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                      Manager
+                      Lead
                     </p>
                     <p className="mt-2 text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                      {project?.manager_name || "Not set"}
+                      {projectLead?.name ?? "No lead assigned"}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-zinc-500 dark:text-zinc-400">
+                      {projectLead?.email ?? "Assign a lead from the Team tab."}
                     </p>
                   </div>
                   <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                      Listed team
+                      Team members
                     </p>
                     <p className="mt-2 text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                      {project?.team_members?.length
-                        ? project.team_members.join(", ")
-                        : "Not set"}
+                      {team.length} contributor{team.length === 1 ? "" : "s"}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                      Manage access and roles from the Team tab.
                     </p>
                   </div>
                 </div>
