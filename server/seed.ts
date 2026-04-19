@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
+import { pathToFileURL } from "node:url";
 import { connectToDatabase, getDb, closeDatabase } from "./sqliteConnector.js";
 
 const SQLITE_DB = process.env.SQLITE_DB ?? "trackit.db";
-const PASSWORD = "passworD12345!";
+export const DEMO_PASSWORD = "passworD12345!";
 
 type UserSeed = {
   name: string;
@@ -75,17 +76,26 @@ const riskTemplates = [
   { title: "Scope creep from stakeholder requests", impact: "Medium", status: "Open" },
 ];
 
-async function seed() {
-  await connectToDatabase(SQLITE_DB);
+type SeedOptions = {
+  closeWhenDone?: boolean;
+  databasePath?: string;
+};
+
+export async function seedDatabase({
+  closeWhenDone = true,
+  databasePath = SQLITE_DB,
+}: SeedOptions = {}) {
+  await connectToDatabase(databasePath);
   const db = getDb();
 
+  await db.exec("DELETE FROM password_reset_codes;");
   await db.exec("DELETE FROM requirements;");
   await db.exec("DELETE FROM risks;");
   await db.exec("DELETE FROM project_users;");
   await db.exec("DELETE FROM projects;");
   await db.exec("DELETE FROM users;");
 
-  const passwordHash = await bcrypt.hash(PASSWORD, 10);
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
 
   for (const user of users) {
     await db.run(
@@ -110,11 +120,9 @@ async function seed() {
     const projectId =
       (
         await db.run(
-          "INSERT INTO projects (name, description, manager_name, team_members_json, owner_user_id) VALUES (?, ?, ?, ?, ?);",
+          "INSERT INTO projects (name, description, owner_user_id) VALUES (?, ?, ?);",
           projectSeed.name,
           projectSeed.description,
-          projectSeed.managerName,
-          JSON.stringify(projectSeed.teamMembers),
           owner.id
         )
       ).lastID ?? 0;
@@ -169,10 +177,14 @@ async function seed() {
   }
 
   console.log("Seed complete.");
-  await closeDatabase();
+  if (closeWhenDone) {
+    await closeDatabase();
+  }
 }
 
-seed().catch((error) => {
-  console.error("Seed failed:", error);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  seedDatabase().catch((error) => {
+    console.error("Seed failed:", error);
+    process.exit(1);
+  });
+}
