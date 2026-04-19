@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import PageLayout from "../../_components/PageLayout";
+import { getRiskColor, getRiskIcon } from "./riskStyle";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001";
 
@@ -12,6 +13,8 @@ type Project = {
   id: number;
   name: string;
   description: string | null;
+  manager_name?: string | null;
+  team_members?: string[];
 };
 
 type Requirement = {
@@ -35,25 +38,6 @@ type ProjectUser = {
   email: string;
 };
 
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .slice(0, 2)
-    .map((chunk) => chunk[0])
-    .join("")
-    .toUpperCase();
-
-const statusClass = (status: string) => {
-  const normalized = status.toLowerCase();
-  if (normalized.includes("approved") || normalized.includes("closed")) {
-    return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200";
-  }
-  if (normalized.includes("review") || normalized.includes("monitoring")) {
-    return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200";
-  }
-  return "border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200";
-};
-
 export default function ProjectDetailsPage() {
   const params = useParams<{ projectId?: string }>();
   const projectId = useMemo(() => {
@@ -67,20 +51,10 @@ export default function ProjectDetailsPage() {
   const [team, setTeam] = useState<ProjectUser[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const approvedRequirements = requirements.filter((item) =>
-    item.status.toLowerCase().includes("approved")
-  ).length;
-  const openRisks = risks.filter(
-    (item) => !item.status.toLowerCase().includes("closed")
-  ).length;
-  const projectLead = team.find((member) => member.role === "Lead");
 
   useEffect(() => {
     if (!Number.isFinite(projectId) || projectId <= 0) {
       setErrorMessage(`Invalid project id: ${params?.projectId}`);
-      setIsLoading(false);
       return;
     }
     Promise.all([
@@ -119,16 +93,13 @@ export default function ProjectDetailsPage() {
       })
       .catch((error: Error) => {
         setErrorMessage(error.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
       });
   }, [projectId, params]);
 
   return (
     <PageLayout
-      title={project?.name ?? "Project workspace"}
-      description="Overview, requirements, risks, and team activity in one project command view."
+      title="Project workspace"
+      description="Overview, requirements, risks, and team details in one place."
       breadcrumbs={[
         { label: "Projects", href: "/projects" },
         {
@@ -139,222 +110,190 @@ export default function ProjectDetailsPage() {
     >
       <div className="space-y-6">
         {errorMessage ? (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
             {errorMessage}
           </div>
         ) : null}
         {hasAccess === false ? (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/50 dark:text-rose-200">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
             You are not on this project team. Join the team to view the project
             workspace.
           </div>
         ) : null}
-
-        {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-24 animate-pulse rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900"
-              />
-            ))}
-          </div>
-        ) : null}
-
-        {hasAccess === false || isLoading ? null : (
+        <div className="flex justify-end">
+          <Link
+            href="/projects"
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-500"
+          >
+            Back to projects
+          </Link>
+        </div>
+        {hasAccess === false ? null : (
           <>
-            <nav className="flex flex-wrap gap-2">
-              {[
-                ["Overview", `/projects/${projectId}`],
-                ["Requirements", `/projects/${projectId}/requirements`],
-                ["Risks", `/projects/${projectId}/risks`],
-                ["Team", `/projects/${projectId}/team`],
-              ].map(([label, href]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`rounded-lg px-3 py-2 text-sm font-bold transition ${
-                    label === "Overview"
-                      ? "bg-emerald-700 text-white"
-                      : "border border-zinc-200 bg-white text-zinc-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
-                  }`}
-                >
-                  {label}
-                </Link>
-              ))}
-            </nav>
-
-            <section className="grid gap-4 md:grid-cols-4">
-              {[
-                ["Requirements", requirements.length],
-                ["Approved", approvedRequirements],
-                ["Open risks", openRisks],
-                ["Contributors", team.length],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900"
-                >
-                  <p className="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-                    {value}
-                  </p>
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                    {label}
-                  </p>
-                </div>
-              ))}
-            </section>
-
-            <section className="grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-              <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
+            <section className="grid gap-6 lg:grid-cols-[1.6fr_0.8fr]">
+              <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
-                      Project brief
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
+                      Project overview
                     </p>
-                    <h2 className="mt-3 text-xl font-bold text-zinc-950 dark:text-zinc-50">
+                    <h2 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">
                       {project?.name ?? "Project details"}
                     </h2>
-                    <p className="mt-3 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                    <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
                       {project?.description || "No description provided yet."}
                     </p>
+                    <div className="mt-4 grid gap-3 text-sm text-slate-600 dark:text-slate-300 md:grid-cols-2">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                          Manager name
+                        </p>
+                        <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
+                          {project?.manager_name || "Not set"}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                          Team members list
+                        </p>
+                        <p className="mt-2 font-medium text-slate-800 dark:text-slate-100">
+                          {project?.team_members?.length
+                            ? project.team_members.join(", ")
+                            : "Not set"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <span className="rounded-md bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200">
-                    Active
-                  </span>
-                </div>
-                <div className="mt-5 grid gap-3 md:grid-cols-2">
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                      Lead
-                    </p>
-                    <p className="mt-2 text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                      {projectLead?.name ?? "No lead assigned"}
-                    </p>
-                    <p className="mt-1 truncate text-xs text-zinc-500 dark:text-zinc-400">
-                      {projectLead?.email ?? "Assign a lead from the Team tab."}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                      Team members
-                    </p>
-                    <p className="mt-2 text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                      {team.length} contributor{team.length === 1 ? "" : "s"}
-                    </p>
-                    <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                      Manage access and roles from the Team tab.
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">
+                      Active
+                    </span>
                   </div>
                 </div>
               </div>
-
-              <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                  Team
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
+                  Team spotlight
                 </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {team.slice(0, 8).map((member) => (
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  {team.slice(0, 5).map((member) => (
                     <div
                       key={member.id}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 text-xs font-bold text-white dark:bg-zinc-100 dark:text-zinc-950"
-                      title={member.name}
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-sm font-semibold text-white shadow-sm dark:bg-slate-100 dark:text-slate-900"
                     >
-                      {getInitials(member.name)}
+                      {member.name
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((chunk) => chunk[0])
+                        .join("")}
                     </div>
                   ))}
                 </div>
-                <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-300">
-                  {team.length} contributors, including{" "}
-                  {team.filter((member) => member.role === "Lead").length} lead.
+                <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
+                  {team.length} total contributors ·{" "}
+                  {team.filter((member) => member.role === "Lead").length} lead
                 </p>
                 <Link
                   href={`/projects/${projectId}/team`}
-                  className="mt-4 inline-flex rounded-lg border border-zinc-200 px-3 py-2 text-sm font-bold text-zinc-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-zinc-800 dark:text-zinc-200"
+                  className="mt-4 inline-flex text-sm font-semibold text-slate-700 dark:text-slate-200"
                 >
-                  Manage team
+                  Manage team →
                 </Link>
               </div>
             </section>
 
-            <section className="grid gap-5 xl:grid-cols-2">
-              <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-                <div className="flex items-center justify-between gap-4">
+            <section className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-bold text-zinc-950 dark:text-zinc-50">
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
                       Requirements
-                    </h2>
-                    <p className="mt-1 text-sm text-zinc-500">
-                      Latest scope records.
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      {requirements.length} total
                     </p>
                   </div>
                   <Link
                     href={`/projects/${projectId}/requirements`}
-                    className="rounded-lg bg-zinc-950 px-3 py-2 text-xs font-bold text-white dark:bg-zinc-100 dark:text-zinc-950"
+                    className="text-xs font-semibold text-slate-500 dark:text-slate-300"
                   >
-                    Open
+                    Open →
                   </Link>
                 </div>
-                <div className="mt-4 divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+                <div className="mt-5 space-y-3">
                   {requirements.length === 0 ? (
-                    <div className="bg-zinc-50 px-4 py-6 text-sm text-zinc-500 dark:bg-zinc-900">
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
                       No requirements yet.
                     </div>
                   ) : null}
-                  {requirements.slice(0, 5).map((item) => (
-                    <div key={item.id} className="bg-white px-4 py-3 dark:bg-zinc-950">
+                  {requirements.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                    >
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                          {item.title}
-                        </p>
-                        <span className={`rounded-md border px-2 py-1 text-xs font-bold ${statusClass(item.status)}`}>
-                          {item.status}
+                        <span className="font-semibold">{item.title}</span>
+                        <span className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
+                          {item.type}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs text-zinc-500">{item.type}</p>
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        Status: {item.status}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-                <div className="flex items-center justify-between gap-4">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-bold text-zinc-950 dark:text-zinc-50">
+                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
                       Risks
-                    </h2>
-                    <p className="mt-1 text-sm text-zinc-500">
-                      Active issues to monitor.
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      {risks.length} total
                     </p>
                   </div>
                   <Link
                     href={`/projects/${projectId}/risks`}
-                    className="rounded-lg bg-zinc-950 px-3 py-2 text-xs font-bold text-white dark:bg-zinc-100 dark:text-zinc-950"
+                    className="text-xs font-semibold text-slate-500 dark:text-slate-300"
                   >
-                    Open
+                    Open →
                   </Link>
                 </div>
-                <div className="mt-4 divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+                <div className="mt-5 space-y-3">
                   {risks.length === 0 ? (
-                    <div className="bg-zinc-50 px-4 py-6 text-sm text-zinc-500 dark:bg-zinc-900">
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
                       No risks yet.
                     </div>
                   ) : null}
-                  {risks.slice(0, 5).map((item) => (
-                    <div key={item.id} className="bg-white px-4 py-3 dark:bg-zinc-950">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-sm font-bold text-zinc-950 dark:text-zinc-50">
-                          {item.title}
+                  {risks.map((item) => {
+                    const StatusIcon = getRiskIcon(item.status);
+                    const ImpactIcon = getRiskIcon(item.impact);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="font-semibold">{item.title}</span>
+                          <span className={`inline-flex items-center gap-1  rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] dark:border-slate-700 dark:bg-slate-900 ${getRiskColor(item.impact)}`}>
+                            {item.impact} impact
+                            <ImpactIcon size={16} strokeWidth={3} />
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                          
+                          <span  className={`inline-flex items-center gap-1 ${getRiskColor(item.status)}`}>
+                            <StatusIcon size={16} />
+                            {item.status}                            
+                          </span>
                         </p>
-                        <span className={`rounded-md border px-2 py-1 text-xs font-bold ${statusClass(item.status)}`}>
-                          {item.status}
-                        </span>
                       </div>
-                      <p className="mt-1 text-xs text-zinc-500">
-                        {item.impact} impact
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </section>
