@@ -4,16 +4,45 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { connectToDatabase, getDb } from './sqliteConnector.js';
+import { seedDatabase } from './seed.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
 const SQLITE_DB = process.env.SQLITE_DB ?? 'trackit.db';
+const SEED_SECRET = process.env.SEED_SECRET;
+const AUTO_SEED_IF_EMPTY = process.env.AUTO_SEED_IF_EMPTY === 'true';
 
 const normalizeEmail = (email: unknown) => String(email ?? '').trim().toLowerCase();
 const hashResetCode = (code: string) =>
   crypto.createHash('sha256').update(code).digest('hex');
+
+const seedDatabaseIfEmpty = async () => {
+  if (!AUTO_SEED_IF_EMPTY) {
+    return;
+  }
+
+  const db = getDb();
+  const users = await db.get<{ count: number }>(
+    'SELECT COUNT(*) as count FROM users;'
+  );
+  const projects = await db.get<{ count: number }>(
+    'SELECT COUNT(*) as count FROM projects;'
+  );
+  const userCount = users?.count ?? 0;
+  const projectCount = projects?.count ?? 0;
+
+  if (userCount > 0 || projectCount > 0) {
+    console.log(
+      `Auto seed skipped. Existing data found: ${userCount} users, ${projectCount} projects.`
+    );
+    return;
+  }
+
+  console.log('Auto seed enabled and database is empty. Seeding demo data...');
+  await seedDatabase({ closeWhenDone: false, databasePath: SQLITE_DB });
+};
 
 app.use(cors());
 app.use(express.json());
@@ -40,6 +69,30 @@ app.get('/api/hello', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
+  }
+});
+
+app.post('/api/admin/seed', async (req, res) => {
+  if (!SEED_SECRET) {
+    return res.status(404).json({ error: 'Seed endpoint is disabled.' });
+  }
+
+  const providedSecret = String(
+    req.header('x-seed-secret') ?? req.body?.seedSecret ?? ''
+  );
+
+  if (providedSecret !== SEED_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized.' });
+  }
+
+  try {
+    await seedDatabase({ closeWhenDone: false, databasePath: SQLITE_DB });
+    return res.json({
+      message: 'Seed complete.',
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Seed failed.' });
   }
 });
 
@@ -730,7 +783,9 @@ app.delete('/api/risks/:id', async (req, res) => {
 });
 
 connectToDatabase(SQLITE_DB)
-  .then(() => {
+  .then(async () => {
+    await seedDatabaseIfEmpty();
+
     const server = app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
