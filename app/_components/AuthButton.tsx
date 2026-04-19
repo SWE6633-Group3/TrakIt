@@ -41,7 +41,13 @@ const getAvatarStyle = (value: string) => {
   return AVATAR_STYLES[total % AVATAR_STYLES.length];
 };
 
-export default function AuthButton() {
+type AuthButtonProps = {
+  menuPlacement?: "down" | "up" | "responsive";
+};
+
+export default function AuthButton({
+  menuPlacement = "responsive",
+}: AuthButtonProps) {
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -50,6 +56,12 @@ export default function AuthButton() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const avatarText = getInitials(userLabel);
   const avatarStyle = getAvatarStyle(userEmail || userLabel);
+  const menuPlacementClass =
+    menuPlacement === "up"
+      ? "bottom-full pb-2"
+      : menuPlacement === "down"
+        ? "top-full pt-2"
+        : "top-full pt-2 lg:top-auto lg:bottom-full lg:pt-0 lg:pb-2";
 
   useEffect(() => {
     const syncFromStorage = () => {
@@ -127,7 +139,7 @@ export default function AuthButton() {
     return (
       <Link
         href="/login"
-        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-slate-700 transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-500"
+        className="inline-flex w-full items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-emerald-700"
       >
         Log in
       </Link>
@@ -144,7 +156,7 @@ export default function AuthButton() {
       <button
         type="button"
         onClick={() => setIsMenuOpen((prev) => !prev)}
-        className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+        className="flex w-full items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-zinc-900 shadow-sm transition hover:border-emerald-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-emerald-700"
         aria-haspopup="menu"
         aria-expanded={isMenuOpen}
       >
@@ -154,18 +166,18 @@ export default function AuthButton() {
         >
           {avatarText}
         </span>
-        <span>{userLabel}</span>
-        <span aria-hidden="true" className="text-xs">
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{userLabel}</span>
+        <span aria-hidden="true" className="text-xs text-zinc-400">
           v
         </span>
       </button>
       {isMenuOpen ? (
         <div
           role="menu"
-          className="absolute right-0 z-50 w-64 pt-2"
+          className={`absolute right-0 z-50 w-64 ${menuPlacementClass}`}
         >
-          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-            <div className="flex items-center gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
+          <div className="rounded-lg border border-zinc-200 bg-white p-3 shadow-xl shadow-zinc-950/10 dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="flex items-center gap-3 border-b border-zinc-100 pb-3 dark:border-zinc-800">
               <div
                 aria-hidden="true"
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${avatarStyle}`}
@@ -173,21 +185,21 @@ export default function AuthButton() {
                 {avatarText}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
                   Profile settings
                 </p>
-                <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-1 truncate text-xs text-zinc-500 dark:text-zinc-400">
                   {userEmail || userLabel}
                 </p>
               </div>
             </div>
-            <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950">
+            <div className="mt-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
                     Theme
                   </p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                     Update your display preference.
                   </p>
                 </div>
@@ -198,7 +210,7 @@ export default function AuthButton() {
               type="button"
               onClick={handleLogout}
               role="menuitem"
-              className="mt-3 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-500"
+              className="mt-3 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:border-rose-300 hover:text-rose-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:border-rose-700 dark:hover:text-rose-300"
             >
               Log out
             </button>

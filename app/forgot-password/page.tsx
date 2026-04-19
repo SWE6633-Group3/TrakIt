@@ -108,7 +108,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <section className="rounded-lg border border-slate-200 bg-white px-8 py-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
           Account Recovery
         </p>
@@ -126,12 +126,12 @@ export default function ForgotPasswordPage() {
         <div className="mt-8">
           {step === 3 ? (
             <div className="space-y-6">
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center text-sm font-medium text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
+              <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-4 text-center text-sm font-medium text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
                 You can now log in with your new password.
               </div>
               <Link
                 href="/login"
-                className="block w-full rounded-xl bg-slate-900 py-3.5 text-center text-sm font-semibold text-white shadow-md transition-all hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
+                className="block w-full rounded-lg bg-slate-900 py-3.5 text-center text-sm font-semibold text-white shadow-md transition-all hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
               >
                 Return to Login
               </Link>
@@ -148,7 +148,7 @@ export default function ForgotPasswordPage() {
                     required
                     disabled={step === 2}
                     placeholder="name@company.com"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:focus:ring-blue-500/40"
+                    className="w-full rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:focus:ring-blue-500/40"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                   />
@@ -157,7 +157,7 @@ export default function ForgotPasswordPage() {
                 {step === 2 && (
                   <div className="space-y-5">
                     {demoCode && (
-                      <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
+                      <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
                         <p className="font-semibold">Demo reset code: {demoCode}</p>
                         <p className="mt-1 text-xs">
                           For the class demo, enter this code below. It expires in 10 minutes.
@@ -177,7 +177,7 @@ export default function ForgotPasswordPage() {
                         required
                         value={resetCode}
                         placeholder="000000"
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white"
+                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white"
                         onChange={(event) => setResetCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
                       />
                     </div>
@@ -190,7 +190,7 @@ export default function ForgotPasswordPage() {
                         type="password"
                         required
                         value={passwords.new}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white"
+                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white"
                         onChange={(event) => setPasswords({ ...passwords, new: event.target.value })}
                       />
                     </div>
@@ -203,7 +203,7 @@ export default function ForgotPasswordPage() {
                         type="password"
                         required
                         value={passwords.confirm}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white"
+                        className="w-full rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm text-slate-900 outline-none transition-all focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white"
                         onChange={(event) => setPasswords({ ...passwords, confirm: event.target.value })}
                       />
                     </div>
@@ -213,7 +213,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50"
+                  className="w-full rounded-lg bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50"
                 >
                   {loading ? "Processing..." : step === 1 ? "Generate Reset Code" : "Reset Password"}
                 </button>
@@ -221,7 +221,7 @@ export default function ForgotPasswordPage() {
 
               {message && (
                 <div
-                  className={`mt-6 rounded-2xl border p-4 text-xs font-medium ${
+                  className={`mt-6 rounded-lg border p-4 text-xs font-medium ${
                     message.type === "success"
                       ? "border-emerald-100 bg-emerald-50 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400"
                       : "border-rose-100 bg-rose-50 text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400"
@@ -244,7 +244,7 @@ export default function ForgotPasswordPage() {
         </div>
       </section>
 
-      <aside className="rounded-3xl border border-slate-200 bg-slate-50 px-8 py-8 dark:border-slate-800 dark:bg-slate-950">
+      <aside className="rounded-lg border border-slate-200 bg-slate-50 px-8 py-8 dark:border-slate-800 dark:bg-slate-950">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Demo recovery flow
         </h2>

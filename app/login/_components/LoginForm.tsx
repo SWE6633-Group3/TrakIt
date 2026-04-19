@@ -18,7 +18,7 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY) === "true") {
-      router.push("/projects");
+      router.push("/dashboard");
     }
   }, [router]);
 
@@ -55,8 +55,8 @@ export default function LoginForm() {
       }
 
       window.dispatchEvent(new Event(AUTH_EVENT));
-      router.push("/projects");
-      router.refresh(); 
+      router.push("/dashboard");
+      router.refresh();
       
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -73,7 +73,7 @@ export default function LoginForm() {
     <form onSubmit={handleLogin} className="space-y-5">
       {/* Email Field */}
       <div className="space-y-2">
-        <label htmlFor="email-field" className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+        <label htmlFor="email-field" className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
           Email
         </label>
         <input
@@ -83,14 +83,14 @@ export default function LoginForm() {
           autoComplete="email"
           placeholder="name@company.com"
           onChange={() => setErrorMessage(null)}
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:ring-emerald-950"
           required
         />
       </div>
 
       {/* Password Field */}
       <div className="space-y-2">
-        <label htmlFor="password-field" className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+        <label htmlFor="password-field" className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
           Password
         </label>
         <input
@@ -100,14 +100,14 @@ export default function LoginForm() {
           autoComplete="current-password"
           placeholder="Enter your password"
           onChange={() => setErrorMessage(null)}
-          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:ring-emerald-950"
           required
         />
       </div>
 
       {/* Error Message */}
       {errorMessage && (
-        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {errorMessage}
         </div>
       )}
@@ -116,7 +116,7 @@ export default function LoginForm() {
       <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
         <button
           type="submit"
-          className="rounded-full bg-slate-900 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-slate-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+          className="rounded-lg bg-emerald-700 px-8 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Signing in..." : "Log in"}
@@ -126,13 +126,13 @@ export default function LoginForm() {
         <div className="flex flex-col items-end gap-1">
           <Link
             href="/forgot-password"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:text-white"
+            className="text-sm font-semibold text-zinc-600 transition-colors hover:text-emerald-700 dark:text-zinc-300 dark:hover:text-emerald-300"
           >
             Forgot password?
           </Link>
           <Link
             href="/signup"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors dark:text-slate-300 dark:hover:text-white"
+            className="text-sm font-semibold text-zinc-600 transition-colors hover:text-emerald-700 dark:text-zinc-300 dark:hover:text-emerald-300"
           >
             Don&apos;t have an account? Sign Up
           </Link>
