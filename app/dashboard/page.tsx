@@ -487,7 +487,7 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="min-w-[820px]">
+            <div className="min-w-205">
               <div className="grid grid-cols-[1.5fr_0.75fr_0.45fr_0.45fr_0.45fr_1fr_0.6fr] gap-3 border-b border-zinc-200 px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-zinc-500 dark:border-zinc-800">
                 <span>Project</span>
                 <span>Health</span>
