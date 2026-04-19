@@ -20,39 +20,37 @@ export default function PageLayout({
   breadcrumbs,
 }: PageLayoutProps) {
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-7 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="space-y-2">
-            {breadcrumbs && breadcrumbs.length > 0 ? (
-              <nav className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
-                {breadcrumbs.map((crumb, index) => (
-                  <span key={crumb.href} className="flex items-center gap-2">
-                    <Link href={crumb.href} className="hover:text-slate-600">
-                      {crumb.label}
-                    </Link>
-                    {index < breadcrumbs.length - 1 ? (
-                      <span className="text-slate-300">/</span>
-                    ) : null}
-                  </span>
-                ))}
-              </nav>
-            ) : (
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
-                Workspace
-              </p>
-            )}
-            <h1 className="text-3xl font-semibold text-slate-900 md:text-4xl dark:text-slate-100">
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="border-b border-zinc-100 bg-white px-5 py-6 md:px-7 dark:border-zinc-800 dark:bg-zinc-950">
+          {breadcrumbs && breadcrumbs.length > 0 ? (
+            <nav className="mb-4 flex flex-wrap items-center gap-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+              {breadcrumbs.map((crumb, index) => (
+                <span key={crumb.href} className="flex items-center gap-2">
+                  <Link href={crumb.href} className="hover:text-emerald-700 dark:hover:text-emerald-300">
+                    {crumb.label}
+                  </Link>
+                  {index < breadcrumbs.length - 1 ? (
+                    <span className="text-zinc-300 dark:text-zinc-700">/</span>
+                  ) : null}
+                </span>
+              ))}
+            </nav>
+          ) : (
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">
+              Workspace
+            </p>
+          )}
+          <div className="max-w-3xl">
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-950 md:text-4xl dark:text-zinc-50">
               {title}
             </h1>
-            <p className="max-w-2xl text-base text-slate-600 dark:text-slate-300">
+            <p className="mt-3 text-base leading-7 text-zinc-600 dark:text-zinc-300">
               {description}
             </p>
           </div>
         </div>
-      </section>
-      <section className="rounded-3xl border border-slate-200 bg-white px-8 py-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        {children}
+        <div className="px-5 py-5 md:px-7 md:py-7">{children}</div>
       </section>
     </div>
   );
