@@ -6,6 +6,7 @@ import PageLayout from "../../_components/PageLayout";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001";
 const USER_ID_KEY = "trakItUserId";
+const PROJECTS_EVENT = "trakItProjectsChanged";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -73,6 +74,7 @@ export default function NewProjectPage() {
       }
 
       const payload = await response.json();
+      window.dispatchEvent(new Event(PROJECTS_EVENT));
       const projectId = payload?.project?.id;
       if (projectId) {
         router.push(`/projects/${projectId}`);
@@ -90,15 +92,15 @@ export default function NewProjectPage() {
 
   return (
     <PageLayout
-      title="Project Profile Information Collection"
+      title="New project"
       description="Capture the core profile details for a project before moving into requirements, risks, and team management."
       breadcrumbs={[
         { label: "Projects", href: "/projects" },
-        { label: "Profile", href: "/projects/new" },
+        { label: "New Project", href: "/projects/new" },
       ]}
     >
       <div className="space-y-8">
-        <section className="grid gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950 md:grid-cols-3">
+        <section className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950 md:grid-cols-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
               Collection scope
@@ -127,7 +129,7 @@ export default function NewProjectPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="space-y-5 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
               <div>
                 <label
                   htmlFor="project-name"
@@ -139,7 +141,7 @@ export default function NewProjectPage() {
                   id="project-name"
                   value={projectName}
                   onChange={(event) => setProjectName(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   placeholder="Enter project name"
                   required
                 />
@@ -157,13 +159,13 @@ export default function NewProjectPage() {
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   rows={6}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   placeholder="Summarize the project scope, purpose, and expected outcome"
                 />
               </div>
             </div>
 
-            <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+            <div className="space-y-5 rounded-lg border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
               <div>
                 <label
                   htmlFor="manager-name"
@@ -175,7 +177,7 @@ export default function NewProjectPage() {
                   id="manager-name"
                   value={managerName}
                   onChange={(event) => setManagerName(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                  className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                   placeholder="Enter manager name"
                 />
               </div>
@@ -204,7 +206,7 @@ export default function NewProjectPage() {
                         onChange={(event) =>
                           updateMember(index, event.target.value)
                         }
-                        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                        className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                         placeholder={`Team member ${index + 1}`}
                       />
                       <button
@@ -222,7 +224,7 @@ export default function NewProjectPage() {
           </div>
 
           {errorMessage ? (
-            <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {errorMessage}
             </p>
           ) : null}

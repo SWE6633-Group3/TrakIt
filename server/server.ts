@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
 import { connectToDatabase, getDb } from './sqliteConnector.js';
 
 dotenv.config();
@@ -10,65 +11,9 @@ const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
 const SQLITE_DB = process.env.SQLITE_DB ?? 'trackit.db';
 
-const parseTeamMembers = (value: unknown) => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((member) => String(member ?? '').trim())
-    .filter(Boolean);
-};
-
-const parseStoredTeamMembers = (value: unknown) => {
-  if (typeof value !== 'string' || !value.trim()) {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed)
-      ? parsed
-          .map((member) => String(member ?? '').trim())
-          .filter(Boolean)
-      : [];
-  } catch {
-    return [];
-  }
-};
-
-const hydrateProject = <
-  T extends {
-    team_members_json?: string | null;
-    [key: string]: unknown;
-  },
->(
-  project: T | undefined
-) => {
-  if (!project) {
-    return project;
-  }
-
-  const { team_members_json, ...rest } = project;
-  return {
-    ...rest,
-    team_members: parseStoredTeamMembers(team_members_json),
-  };
-};
-
-type ProjectRow = {
-  id: number;
-  name: string;
-  description: string | null;
-  manager_name: string | null;
-  team_members_json?: string | null;
-  owner_user_id: number;
-  created_at: string;
-  current_user_role?: string | null;
-  requirements_count?: number;
-  risks_count?: number;
-  team_count?: number;
-};
+const normalizeEmail = (email: unknown) => String(email ?? '').trim().toLowerCase();
+const hashResetCode = (code: string) =>
+  crypto.createHash('sha256').update(code).digest('hex');
 
 app.use(cors());
 app.use(express.json());
@@ -92,26 +37,6 @@ app.get('/api/hello', async (req, res) => {
     const users = await db.get<{ count: number }>('SELECT COUNT(*) as count FROM users;');
     const projects = await db.get<{ count: number }>('SELECT COUNT(*) as count FROM projects;');
     res.json({ message: 'Hello from the server!', users: users?.count ?? 0, projects: projects?.count ?? 0 });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'DB error' });
-  }
-});
-
-app.get('/api/users/search', async (req, res) => {
-  const q = String(req.query.q ?? '').trim().toLowerCase();
-  if (!q) {
-    return res.json({ users: [] });
-  }
-
-  try {
-    const db = getDb();
-    const users = await db.all(
-      'SELECT id, name, email FROM users WHERE LOWER(email) LIKE ? LIMIT 10;',
-      `%${q}%`
-    );
-
-    res.json({ users });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -208,6 +133,150 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+app.post('/api/verify-email', async (req, res) => {
+    const { email } = req.body;
+    console.log('Verifying email:', email);
+    
+    try {
+        const db = getDb();
+        const user = await db.get('SELECT id FROM users WHERE email = ?', email?.trim().toLowerCase());
+        
+        console.log('User found:', !!user);
+        
+        if (!user) {
+            return res.status(200).json({ exists: false, error: "Account not found" });
+        }
+        return res.status(200).json({ exists: true });
+    } catch (err) {
+        console.error('Error in verify-email:', err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+
+app.get('/api/users/search', async (req, res) => {
+  const q = String(req.query.q ?? '').trim().toLowerCase();
+  if (!q) {
+    return res.json({ users: [] });
+  }
+
+  try {
+    const db = getDb();
+    const users = await db.all(
+      'SELECT id, name, email FROM users WHERE LOWER(email) LIKE ? LIMIT 10;',
+      `%${q}%`
+    );
+
+    return res.json({ users });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'DB error' });
+  }
+});
+
+app.post('/api/password-reset/request', async (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+
+
+  if (!email) {
+    return res.status(400).json({ error: 'email is required' });
+  }
+
+  try {
+    const db = getDb();
+    const user = await db.get<{ id: number }>(
+      'SELECT id FROM users WHERE email = ?;',
+      email
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: 'No account was found for that email.' });
+    }
+
+    const code = String(crypto.randomInt(100000, 1000000));
+    const codeHash = hashResetCode(code);
+
+    await db.run(
+      'UPDATE password_reset_codes SET used_at = datetime(\'now\') WHERE user_id = ? AND used_at IS NULL;',
+      user.id
+    );
+
+    await db.run(
+      `INSERT INTO password_reset_codes (user_id, code_hash, expires_at)
+       VALUES (?, ?, datetime('now', '+10 minutes'));`,
+      user.id,
+      codeHash
+    );
+
+    return res.json({
+      message: 'Password reset code generated.',
+      demoCode: code,
+      expiresInMinutes: 10,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'DB error while generating reset code' });
+  }
+});
+
+app.post('/api/password-reset/confirm', async (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+  const code = String(req.body?.code ?? '').trim();
+  const newPassword = String(req.body?.newPassword ?? '');
+
+  if (!email || !code || !newPassword) {
+    return res.status(400).json({ error: 'email, code, and newPassword are required' });
+  }
+
+  if (!/^\d{6}$/.test(code)) {
+    return res.status(400).json({ error: 'Reset code must be 6 digits.' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  }
+
+  try {
+    const db = getDb();
+    const codeHash = hashResetCode(code);
+    const resetCode = await db.get<{ id: number; user_id: number }>(
+      `SELECT prc.id, prc.user_id
+       FROM password_reset_codes prc
+       INNER JOIN users u ON u.id = prc.user_id
+       WHERE u.email = ?
+         AND prc.code_hash = ?
+         AND prc.used_at IS NULL
+         AND prc.expires_at > datetime('now')
+       ORDER BY prc.created_at DESC
+       LIMIT 1;`,
+      email,
+      codeHash
+    );
+
+    if (!resetCode) {
+      return res.status(400).json({ error: 'Reset code is invalid or expired.' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await db.run(
+      'UPDATE users SET password_hash = ? WHERE id = ?;',
+      passwordHash,
+      resetCode.user_id
+    );
+
+    await db.run(
+      'UPDATE password_reset_codes SET used_at = datetime(\'now\') WHERE id = ?;',
+      resetCode.id
+    );
+
+    return res.json({ message: 'Password updated successfully.' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'DB error while resetting password' });
+  }
+});
+
 app.get('/api/projects', async (req, res) => {
   const ownerUserId = Number(req.query.ownerUserId ?? 0);
   if (!ownerUserId) {
@@ -239,13 +308,11 @@ app.get('/api/projects-summary', async (req, res) => {
 
   try {
     const db = getDb();
-    const projects = await db.all<ProjectRow>(
+    const projects = await db.all(
       `SELECT
         p.id,
         p.name,
         p.description,
-        p.manager_name,
-        p.team_members_json,
         p.owner_user_id,
         p.created_at,
         pu.role as current_user_role,
@@ -258,7 +325,7 @@ app.get('/api/projects-summary', async (req, res) => {
        ORDER BY p.id DESC;`,
       ownerUserId
     );
-    res.json({ projects: projects.map((project) => hydrateProject(project)) });
+    res.json({ projects });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -273,14 +340,14 @@ app.get('/api/projects/:id', async (req, res) => {
 
   try {
     const db = getDb();
-    const project = await db.get<ProjectRow>(
-      'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
+    const project = await db.get(
+      'SELECT id, name, description, owner_user_id, created_at FROM projects WHERE id = ?;',
       id
     );
     if (!project) {
       return res.status(404).json({ error: 'project not found' });
     }
-    res.json({ project: hydrateProject(project) });
+    res.json({ project });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -288,20 +355,17 @@ app.get('/api/projects/:id', async (req, res) => {
 });
 
 app.post('/api/projects', async (req, res) => {
-  const { name, description, managerName, teamMembers, ownerUserId } = req.body ?? {};
+  const { name, description, ownerUserId } = req.body ?? {};
   if (!name || !ownerUserId) {
     return res.status(400).json({ error: 'name and ownerUserId are required' });
   }
 
   try {
     const db = getDb();
-    const normalizedTeamMembers = parseTeamMembers(teamMembers);
     const result = await db.run(
-      'INSERT INTO projects (name, description, manager_name, team_members_json, owner_user_id) VALUES (?, ?, ?, ?, ?);',
+      'INSERT INTO projects (name, description, owner_user_id) VALUES (?, ?, ?);',
       name,
       description ?? null,
-      managerName ?? null,
-      JSON.stringify(normalizedTeamMembers),
       ownerUserId
     );
     const projectId = result.lastID;
@@ -314,11 +378,11 @@ app.post('/api/projects', async (req, res) => {
       ownerUserId,
       'Lead'
     );
-    const project = await db.get<ProjectRow>(
-      'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
+    const project = await db.get(
+      'SELECT id, name, description, owner_user_id, created_at FROM projects WHERE id = ?;',
       projectId
     );
-    res.status(201).json({ project: hydrateProject(project) });
+    res.status(201).json({ project });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -327,54 +391,24 @@ app.post('/api/projects', async (req, res) => {
 
 app.put('/api/projects/:id', async (req, res) => {
   const id = Number(req.params.id ?? 0);
-  const payload = req.body ?? {};
-  const { name } = payload;
+  const { name, description } = req.body ?? {};
   if (!id || !name) {
     return res.status(400).json({ error: 'id and name are required' });
   }
 
   try {
     const db = getDb();
-    const currentProject = await db.get<{
-      description: string | null;
-      manager_name: string | null;
-      team_members_json: string | null;
-    }>(
-      'SELECT description, manager_name, team_members_json FROM projects WHERE id = ?;',
-      id
-    );
-    if (!currentProject) {
-      return res.status(404).json({ error: 'project not found' });
-    }
-
-    const hasDescription = Object.prototype.hasOwnProperty.call(
-      payload,
-      'description'
-    );
-    const hasManagerName = Object.prototype.hasOwnProperty.call(
-      payload,
-      'managerName'
-    );
-    const hasTeamMembers = Object.prototype.hasOwnProperty.call(
-      payload,
-      'teamMembers'
-    );
-
     await db.run(
-      'UPDATE projects SET name = ?, description = ?, manager_name = ?, team_members_json = ? WHERE id = ?;',
+      'UPDATE projects SET name = ?, description = ? WHERE id = ?;',
       name,
-      hasDescription ? payload.description ?? null : currentProject.description,
-      hasManagerName ? payload.managerName ?? null : currentProject.manager_name,
-      hasTeamMembers
-        ? JSON.stringify(parseTeamMembers(payload.teamMembers))
-        : currentProject.team_members_json ?? '[]',
+      description ?? null,
       id
     );
-    const project = await db.get<ProjectRow>(
-      'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
+    const project = await db.get(
+      'SELECT id, name, description, owner_user_id, created_at FROM projects WHERE id = ?;',
       id
     );
-    res.json({ project: hydrateProject(project) });
+    res.json({ project });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
@@ -518,7 +552,7 @@ app.get('/api/projects/:projectId/requirements', async (req, res) => {
   try {
     const db = getDb();
     const requirements = await db.all(
-      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours, created_at FROM requirements WHERE project_id = ? ORDER BY id DESC;',
+      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE project_id = ? ORDER BY id DESC;',
       projectId
     );
     res.json({ requirements });
@@ -530,7 +564,7 @@ app.get('/api/projects/:projectId/requirements', async (req, res) => {
 
 app.post('/api/projects/:projectId/requirements', async (req, res) => {
   const projectId = Number(req.params.projectId ?? 0);
-  const { title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours } = req.body ?? {};
+  const { title, type, status } = req.body ?? {};
   if (!projectId || !title || !type || !status) {
     return res.status(400).json({ error: 'projectId, title, type, and status are required' });
   }
@@ -538,24 +572,18 @@ app.post('/api/projects/:projectId/requirements', async (req, res) => {
   try {
     const db = getDb();
     const result = await db.run(
-      'INSERT INTO requirements (project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+      'INSERT INTO requirements (project_id, title, type, status) VALUES (?, ?, ?, ?);',
       projectId,
       title,
       type,
-      status,
-      assigned_user_id ?? null,
-      req_analysis_hours ?? 0,
-      design_hours ?? 0,
-      coding_hours ?? 0,
-      testing_hours ?? 0,
-      proj_mgmt_hours ?? 0
+      status
     );
     const requirementId = result.lastID;
     if (!requirementId) {
       throw new Error('Failed to create requirement.');
     }
     const requirement = await db.get(
-      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours, created_at FROM requirements WHERE id = ?;',
+      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE id = ?;',
       requirementId
     );
     res.status(201).json({ requirement });
@@ -567,7 +595,7 @@ app.post('/api/projects/:projectId/requirements', async (req, res) => {
 
 app.put('/api/requirements/:id', async (req, res) => {
   const id = Number(req.params.id ?? 0);
-  const { title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours } = req.body ?? {};
+  const { title, type, status } = req.body ?? {};
   if (!id || !title || !type || !status) {
     return res.status(400).json({ error: 'id, title, type, and status are required' });
   }
@@ -575,20 +603,14 @@ app.put('/api/requirements/:id', async (req, res) => {
   try {
     const db = getDb();
     await db.run(
-      'UPDATE requirements SET title = ?, type = ?, status = ?, assigned_user_id = ?, req_analysis_hours = ?, design_hours = ?, coding_hours = ?, testing_hours = ?, proj_mgmt_hours = ? WHERE id = ?;',
+      'UPDATE requirements SET title = ?, type = ?, status = ? WHERE id = ?;',
       title,
       type,
       status,
-      assigned_user_id ?? null,
-      req_analysis_hours ?? 0,
-      design_hours ?? 0,
-      coding_hours ?? 0,
-      testing_hours ?? 0,
-      proj_mgmt_hours ?? 0,
       id
     );
     const requirement = await db.get(
-      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours, created_at FROM requirements WHERE id = ?;',
+      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE id = ?;',
       id
     );
     res.json({ requirement });
@@ -709,8 +731,16 @@ app.delete('/api/risks/:id', async (req, res) => {
 
 connectToDatabase(SQLITE_DB)
   .then(() => {
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
+    });
+
+    // Keep the server reference so it doesn't get garbage collected
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM signal received: closing HTTP server');
+      server.close(() => {
+        console.log('HTTP server closed');
+      });
     });
   })
   .catch((err) => {

@@ -1,2 +1,53 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+@keyframes dashboard-bar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes dashboard-ring {
+  from {
+    opacity: 0;
+    transform: rotate(-24deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes dashboard-count {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dashboard-bar {
+  animation: dashboard-bar 700ms ease-out both;
+}
+
+.animate-dashboard-ring {
+  animation: dashboard-ring 650ms ease-out both;
+}
+
+.animate-dashboard-count {
+  animation: dashboard-count 450ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-dashboard-bar,
+  .animate-dashboard-ring,
+  .animate-dashboard-count {
+    animation: none;
+  }
+}
