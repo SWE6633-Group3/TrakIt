@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import PageLayout from "../../../_components/PageLayout";
-import { getRiskColor } from "../riskColors";
+import { getRiskColor } from "../riskStyle";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001";
 

@@ -1,3 +1,10 @@
+import {
+    AlertCircle, AlertTriangle, Info,
+    CircleDot, Activity, CheckCircle2,
+    LucideIcon
+} from 'lucide-react';
+
+// Color code text based on risk impact/status
 export const getRiskColor = (statusText: string | undefined): string => {
     // Make case-insensitive
     const normalizedStatus = statusText?.toLowerCase() || '';
@@ -17,4 +24,25 @@ export const getRiskColor = (statusText: string | undefined): string => {
 
     // Default to slate gray if no match found
     return colorMap[normalizedStatus] || 'text-slate-500 dark:text-slate-400';
-}
+};
+
+// Add icon based on risk impact/status
+export const getRiskIcon = (statusText: string | undefined): LucideIcon => {
+    // Make case-insensitive
+    const normalizedStatus = statusText?.toLowerCase() || '';
+
+    // Map text values to icons
+    const iconMap: Record<string, LucideIcon> = {
+        // Impact Levels
+        high: AlertCircle,
+        medium: AlertTriangle,
+        low: Info,
+
+        // Status Levels
+        open: CircleDot,
+        monitoring: Activity,
+        closed: CheckCircle2,
+    };
+
+    return iconMap[normalizedStatus] || Info;
+};

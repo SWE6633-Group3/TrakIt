@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import PageLayout from "../../_components/PageLayout";
-import { getRiskColor } from "./riskColors";
+import { getRiskColor, getRiskIcon } from "./riskStyle";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001";
 
@@ -268,22 +268,32 @@ export default function ProjectDetailsPage() {
                       No risks yet.
                     </div>
                   ) : null}
-                  {risks.map((item) => (
-                    <div
-                      key={item.id}
-                      className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-semibold">{item.title}</span>
-                        <span className={`rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] dark:border-slate-700 dark:bg-slate-900 ${getRiskColor(item.impact)}`}>
-                          {item.impact} impact
-                        </span>
+                  {risks.map((item) => {
+                    const StatusIcon = getRiskIcon(item.status);
+                    const ImpactIcon = getRiskIcon(item.impact);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="font-semibold">{item.title}</span>
+                          <span className={`inline-flex items-center gap-1  rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] dark:border-slate-700 dark:bg-slate-900 ${getRiskColor(item.impact)}`}>
+                            {item.impact} impact
+                            <ImpactIcon size={16} strokeWidth={3} />
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                          
+                          <span  className={`inline-flex items-center gap-1 ${getRiskColor(item.status)}`}>
+                            <StatusIcon size={16} />
+                            {item.status}                            
+                          </span>
+                        </p>
                       </div>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        Status: <span  className={getRiskColor(item.status)}>{item.status}</span>
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </section>
