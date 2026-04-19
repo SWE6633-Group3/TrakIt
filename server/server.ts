@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
 import { connectToDatabase, getDb } from './sqliteConnector.js';
 
 dotenv.config();
@@ -9,6 +10,10 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
 const SQLITE_DB = process.env.SQLITE_DB ?? 'trackit.db';
+
+const normalizeEmail = (email: unknown) => String(email ?? '').trim().toLowerCase();
+const hashResetCode = (code: string) =>
+  crypto.createHash('sha256').update(code).digest('hex');
 
 app.use(cors());
 app.use(express.json());
@@ -148,30 +153,102 @@ app.post('/api/verify-email', async (req, res) => {
     }
 });
 
-app.post('/api/forgot-password', async (req, res) => {
-  const { email, newPassword } = req.body ?? {};
+app.post('/api/password-reset/request', async (req, res) => {
+  const email = normalizeEmail(req.body?.email);
 
-  if (!email || !newPassword) {
-    return res.status(400).json({ error: 'Email and new password are required' });
+  if (!email) {
+    return res.status(400).json({ error: 'email is required' });
   }
 
   try {
     const db = getDb();
-    const user = await db.get('SELECT id FROM users WHERE email = ?', email.toLowerCase());
+    const user = await db.get<{ id: number }>(
+      'SELECT id FROM users WHERE email = ?;',
+      email
+    );
 
     if (!user) {
-      return res.status(200).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ error: 'No account was found for that email.' });
+    }
+
+    const code = String(crypto.randomInt(100000, 1000000));
+    const codeHash = hashResetCode(code);
+
+    await db.run(
+      'UPDATE password_reset_codes SET used_at = datetime(\'now\') WHERE user_id = ? AND used_at IS NULL;',
+      user.id
+    );
+
+    await db.run(
+      `INSERT INTO password_reset_codes (user_id, code_hash, expires_at)
+       VALUES (?, ?, datetime('now', '+10 minutes'));`,
+      user.id,
+      codeHash
+    );
+
+    return res.json({
+      message: 'Password reset code generated.',
+      demoCode: code,
+      expiresInMinutes: 10,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'DB error while generating reset code' });
+  }
+});
+
+app.post('/api/password-reset/confirm', async (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+  const code = String(req.body?.code ?? '').trim();
+  const newPassword = String(req.body?.newPassword ?? '');
+
+  if (!email || !code || !newPassword) {
+    return res.status(400).json({ error: 'email, code, and newPassword are required' });
+  }
+
+  if (!/^\d{6}$/.test(code)) {
+    return res.status(400).json({ error: 'Reset code must be 6 digits.' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  }
+
+  try {
+    const db = getDb();
+    const codeHash = hashResetCode(code);
+    const resetCode = await db.get<{ id: number; user_id: number }>(
+      `SELECT prc.id, prc.user_id
+       FROM password_reset_codes prc
+       INNER JOIN users u ON u.id = prc.user_id
+       WHERE u.email = ?
+         AND prc.code_hash = ?
+         AND prc.used_at IS NULL
+         AND prc.expires_at > datetime('now')
+       ORDER BY prc.created_at DESC
+       LIMIT 1;`,
+      email,
+      codeHash
+    );
+
+    if (!resetCode) {
+      return res.status(400).json({ error: 'Reset code is invalid or expired.' });
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
     await db.run(
-      'UPDATE users SET password_hash = ? WHERE email = ?',
-      passwordHash, 
-      email.toLowerCase()
+      'UPDATE users SET password_hash = ? WHERE id = ?;',
+      passwordHash,
+      resetCode.user_id
     );
 
-    return res.json({ success: true, message: 'Password updated successfully!' });
+    await db.run(
+      'UPDATE password_reset_codes SET used_at = datetime(\'now\') WHERE id = ?;',
+      resetCode.id
+    );
+
+    return res.json({ message: 'Password updated successfully.' });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'DB error while resetting password' });
