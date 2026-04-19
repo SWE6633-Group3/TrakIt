@@ -78,6 +78,22 @@ export const migrations: Migration[] = [
           created_at TEXT NOT NULL DEFAULT (datetime('now')),
           FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS password_reset_codes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          code_hash TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          used_at TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_password_reset_codes_user_id
+          ON password_reset_codes(user_id);
+
+        CREATE INDEX IF NOT EXISTS idx_password_reset_codes_code_hash
+          ON password_reset_codes(code_hash);
       `);
     },
   },
@@ -172,6 +188,28 @@ export const migrations: Migration[] = [
           "ALTER TABLE requirements ADD COLUMN proj_mgmt_hours INTEGER DEFAULT 0;"
         );
       }
+    },
+  },
+  {
+    id: "20260419_0003_password_reset_codes",
+    up: async (db) => {
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS password_reset_codes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          code_hash TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          used_at TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_password_reset_codes_user_id
+          ON password_reset_codes(user_id);
+
+        CREATE INDEX IF NOT EXISTS idx_password_reset_codes_code_hash
+          ON password_reset_codes(code_hash);
+      `);
     },
   },
 ];

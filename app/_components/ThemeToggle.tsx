@@ -75,7 +75,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="relative inline-flex h-6 w-10 items-center rounded-full border border-slate-200 bg-white px-0.5 transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-500"
+      className="relative inline-flex h-6 w-10 items-center rounded-full border border-zinc-200 bg-white px-0.5 transition hover:border-emerald-300 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:border-emerald-700"
       aria-label="Toggle dark mode"
       role="switch"
       aria-checked={mode === "dark"}
@@ -83,8 +83,8 @@ export default function ThemeToggle() {
       <span
         className={`flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-semibold transition-transform ${
           mode === "dark"
-            ? "translate-x-4 bg-slate-100 text-slate-900"
-            : "translate-x-0 bg-slate-900 text-white"
+            ? "translate-x-4 bg-emerald-500 text-white"
+            : "translate-x-0 bg-zinc-900 text-white"
         }`}
       >
         {mode === "dark" ? "D" : "L"}

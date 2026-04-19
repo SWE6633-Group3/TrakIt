@@ -3,6 +3,26 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import MainNav from "./_components/MainNav";
 
+const themeInitScript = `
+  (() => {
+    try {
+      const storedTheme = window.localStorage.getItem("trakItTheme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = storedTheme === "light" || storedTheme === "dark"
+        ? storedTheme
+        : prefersDark
+          ? "dark"
+          : "light";
+
+      document.documentElement.classList.toggle("dark", theme === "dark");
+      document.documentElement.style.colorScheme = theme;
+    } catch {
+      document.documentElement.classList.add("dark");
+      document.documentElement.style.colorScheme = "dark";
+    }
+  })();
+`;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,17 +45,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-          <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
-            <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-6 py-4 md:flex-row md:items-center md:justify-between">
-              <MainNav />
-            </div>
-          </header>
-          <main className="mx-auto w-full max-w-6xl px-6 py-10">
+        <div className="min-h-screen bg-[#f4f7f5] text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50">
+          <MainNav />
+          <main className="w-full px-4 py-5 md:px-6 lg:ml-68 lg:max-w-[calc(100vw-17rem)] lg:px-6 lg:py-6">
             {children}
           </main>
         </div>
