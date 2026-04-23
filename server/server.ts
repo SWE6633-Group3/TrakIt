@@ -393,14 +393,55 @@ app.get('/api/projects/:id', async (req, res) => {
 
   try {
     const db = getDb();
-    const project = await db.get(
-      'SELECT id, name, description, owner_user_id, created_at FROM projects WHERE id = ?;',
+    const project = await db.get<{
+      id: number;
+      name: string;
+      description: string | null;
+      manager_name: string | null;
+      team_members_json: string;
+      owner_user_id: number;
+      created_at: string;
+    }>(
+      'SELECT id, name, description, manager_name, team_members_json, owner_user_id, created_at FROM projects WHERE id = ?;',
       id
     );
     if (!project) {
       return res.status(404).json({ error: 'project not found' });
     }
-    res.json({ project });
+
+    const members = await db.all<{ name: string; role: string }[]>(
+      `SELECT u.name, pu.role
+       FROM project_users pu
+       INNER JOIN users u ON u.id = pu.user_id
+       WHERE pu.project_id = ?
+       ORDER BY pu.created_at ASC;`,
+      id
+    );
+
+    let storedMembers: string[] = [];
+    try {
+      const parsed = JSON.parse(project.team_members_json ?? '[]');
+      storedMembers = Array.isArray(parsed)
+        ? parsed.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        : [];
+    } catch {
+      storedMembers = [];
+    }
+
+    const leadMember = members.find((member) => member.role === 'Lead');
+    const teamMembers = members.map((member) => member.name);
+
+    res.json({
+      project: {
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        owner_user_id: project.owner_user_id,
+        created_at: project.created_at,
+        manager_name: leadMember?.name ?? project.manager_name,
+        team_members: teamMembers.length > 0 ? teamMembers : storedMembers,
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'DB error' });
