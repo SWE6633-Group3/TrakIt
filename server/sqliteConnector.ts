@@ -1,4 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
+import { migrations } from "./migrations/index.js";
 
 type RunResult = { lastID?: number };
 
@@ -12,6 +13,39 @@ type DbAdapter = {
 
 let db: DbAdapter | null = null;
 let rawDatabase: DatabaseSync | null = null;
+
+const ensureColumn = async (connectedDb: DbAdapter, table: string, column: string) => {
+  const columns = await connectedDb.all<{ name: string }>(
+    `PRAGMA table_info(${table});`
+  );
+  return columns.some((col) => col.name === column);
+};
+
+const runMigrations = async (connectedDb: DbAdapter) => {
+  await connectedDb.exec(`
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      id TEXT PRIMARY KEY,
+      applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+
+  const appliedMigrations = await connectedDb.all<{ id: string }>(
+    "SELECT id FROM schema_migrations;"
+  );
+  const appliedIds = new Set(appliedMigrations.map((migration) => migration.id));
+
+  for (const migration of migrations) {
+    if (appliedIds.has(migration.id)) {
+      continue;
+    }
+
+    await migration.up(connectedDb);
+    await connectedDb.run(
+      "INSERT INTO schema_migrations (id) VALUES (?);",
+      migration.id
+    );
+  }
+};
 
 export async function connectToDatabase(filename: string) {
   if (db) {
@@ -126,15 +160,18 @@ export async function connectToDatabase(filename: string) {
 
   `);
 
-  const columns = await connectedDb.all<{ name: string }>(
-    "PRAGMA table_info(users);"
+  const hasPasswordHash = await ensureColumn(
+    connectedDb,
+    "users",
+    "password_hash"
   );
-  const hasPasswordHash = columns.some((col) => col.name === "password_hash");
   if (!hasPasswordHash) {
     await connectedDb.exec(
       "ALTER TABLE users ADD COLUMN password_hash TEXT NOT NULL DEFAULT '';"
     );
   }
+
+  await runMigrations(connectedDb);
 
   console.log("Connected to SQLite:", filename);
 
