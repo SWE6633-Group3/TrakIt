@@ -143,6 +143,20 @@ export default function ProjectDetailsPage() {
                     <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
                       {project?.description || "No description provided yet."}
                     </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {[
+                        `${requirements.length} requirements`,
+                        `${risks.length} risks`,
+                        `${team.length} team members`,
+                      ].map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
                     <div className="mt-4 grid gap-3 text-sm text-slate-600 dark:text-slate-300 md:grid-cols-2">
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
                         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
