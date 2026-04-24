@@ -41,7 +41,7 @@ const statusClass = (status: string) => {
   return "border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200";
 };
 
-const totalHours = (item: Requirement) =>
+const totalHours = (item: Requirement) => 
   (item.req_analysis_hours ?? 0) +
   (item.design_hours ?? 0) +
   (item.coding_hours ?? 0) +
