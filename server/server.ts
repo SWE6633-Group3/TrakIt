@@ -53,8 +53,8 @@ app.use((req, res, next) => {
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'success', 
+  res.json({
+    status: 'success',
     message: 'Backend server is running',
     port: PORT
   });
@@ -187,23 +187,23 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/verify-email', async (req, res) => {
-    const { email } = req.body;
-    console.log('Verifying email:', email);
-    
-    try {
-        const db = getDb();
-        const user = await db.get('SELECT id FROM users WHERE email = ?', email?.trim().toLowerCase());
-        
-        console.log('User found:', !!user);
-        
-        if (!user) {
-            return res.status(200).json({ exists: false, error: "Account not found" });
-        }
-        return res.status(200).json({ exists: true });
-    } catch (err) {
-        console.error('Error in verify-email:', err);
-        res.status(500).json({ error: "Server error" });
+  const { email } = req.body;
+  console.log('Verifying email:', email);
+
+  try {
+    const db = getDb();
+    const user = await db.get('SELECT id FROM users WHERE email = ?', email?.trim().toLowerCase());
+
+    console.log('User found:', !!user);
+
+    if (!user) {
+      return res.status(200).json({ exists: false, error: "Account not found" });
     }
+    return res.status(200).json({ exists: true });
+  } catch (err) {
+    console.error('Error in verify-email:', err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 
@@ -678,7 +678,7 @@ app.get('/api/projects/:projectId/requirements', async (req, res) => {
   try {
     const db = getDb();
     const requirements = await db.all(
-      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE project_id = ? ORDER BY id DESC;',
+      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours, created_at FROM requirements WHERE project_id = ? ORDER BY id DESC;',
       projectId
     );
     res.json({ requirements });
@@ -690,7 +690,7 @@ app.get('/api/projects/:projectId/requirements', async (req, res) => {
 
 app.post('/api/projects/:projectId/requirements', async (req, res) => {
   const projectId = Number(req.params.projectId ?? 0);
-  const { title, type, status } = req.body ?? {};
+  const { title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours } = req.body ?? {};
   if (!projectId || !title || !type || !status) {
     return res.status(400).json({ error: 'projectId, title, type, and status are required' });
   }
@@ -698,11 +698,17 @@ app.post('/api/projects/:projectId/requirements', async (req, res) => {
   try {
     const db = getDb();
     const result = await db.run(
-      'INSERT INTO requirements (project_id, title, type, status) VALUES (?, ?, ?, ?);',
+      'INSERT INTO requirements (project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
       projectId,
       title,
       type,
-      status
+      status,
+      assigned_user_id,
+      req_analysis_hours,
+      design_hours,
+      coding_hours,
+      testing_hours,
+      proj_mgmt_hours
     );
     const requirementId = result.lastID;
     if (!requirementId) {
