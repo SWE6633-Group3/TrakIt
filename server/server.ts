@@ -727,7 +727,7 @@ app.post('/api/projects/:projectId/requirements', async (req, res) => {
 
 app.put('/api/requirements/:id', async (req, res) => {
   const id = Number(req.params.id ?? 0);
-  const { title, type, status } = req.body ?? {};
+  const { title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours } = req.body ?? {};
   if (!id || !title || !type || !status) {
     return res.status(400).json({ error: 'id, title, type, and status are required' });
   }
@@ -735,14 +735,20 @@ app.put('/api/requirements/:id', async (req, res) => {
   try {
     const db = getDb();
     await db.run(
-      'UPDATE requirements SET title = ?, type = ?, status = ? WHERE id = ?;',
+      'UPDATE requirements SET title = ?, type = ?, status = ?, assigned_user_id=?, req_analysis_hours=?, design_hours=?, coding_hours=?, testing_hours=?, proj_mgmt_hours=? WHERE id = ?;',
       title,
       type,
       status,
+      assigned_user_id,
+      req_analysis_hours,
+      design_hours,
+      coding_hours,
+      testing_hours,
+      proj_mgmt_hours,
       id
     );
     const requirement = await db.get(
-      'SELECT id, project_id, title, type, status, created_at FROM requirements WHERE id = ?;',
+      'SELECT id, project_id, title, type, status, assigned_user_id, req_analysis_hours, design_hours, coding_hours, testing_hours, proj_mgmt_hours created_at FROM requirements WHERE id = ?;',
       id
     );
     res.json({ requirement });
