@@ -1,8 +1,10 @@
-# TrakIt - [Link](http://example.com)
+# TrakIt - [Production App](https://trak-it-frontend.onrender.com)
 
 TrakIt is a lightweight project management system that tracks software projects, requirements, risks, and effort. Created as part of a software engineering course project.
 
 See `README.app.md` for details on how to set up and run the app.
+
+Production deployment: https://trak-it-frontend.onrender.com
 
 ## Quick Start (Local Development)
 
@@ -51,6 +53,7 @@ npm run start-dev
 ```
 
 - Frontend: `http://localhost:3000`
+- Production frontend: `https://trak-it-frontend.onrender.com`
 - Backend: `http://localhost:3001`
 - Health check: `http://localhost:3001/api/health`
 

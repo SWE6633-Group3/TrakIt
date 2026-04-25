@@ -35,6 +35,8 @@ pnpm install
 
 This project includes the following npm scripts. Run them from the project root.
 
+Production app: https://trak-it-frontend.onrender.com
+
 - `npm run dev` — Start the Next.js development server (default: http://localhost:3000).
 - `npm run build` — Build the app for production (runs Next.js build).
 - `npm start` — Start the production server after building the app.
