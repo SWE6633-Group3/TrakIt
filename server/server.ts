@@ -409,7 +409,7 @@ app.get('/api/projects/:id', async (req, res) => {
       return res.status(404).json({ error: 'project not found' });
     }
 
-    const members = await db.all<{ name: string; role: string }[]>(
+    const members = await db.all<{ name: string; role: string }>(
       `SELECT u.name, pu.role
        FROM project_users pu
        INNER JOIN users u ON u.id = pu.user_id
